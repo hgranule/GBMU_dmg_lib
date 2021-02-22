@@ -1,0 +1,41 @@
+PROJECT_NAME           = "GBMU"
+PROJECT_NUMBER         = 0.0.1
+PROJECT_BRIEF          = "GameBoy simulator"
+OUTPUT_DIRECTORY       = doc
+INPUT                  = inc/ src/
+GENERATE_LATEX         = NO
+
+EXTRACT_ANON_NSPACES   = YES
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+SHOW_NAMESPACES        = NO
+RECURSIVE              = YES
+MACRO_EXPANSION        = YES
+SKIP_FUNCTION_MACROS   = NO
+
+FILE_PATTERNS          = *.c \
+                         *.cc \
+                         *.cxx \
+                         *.cpp \
+                         *.c++ \
+                         *.h \
+                         *.hh \
+                         *.hxx \
+                         *.hpp \
+                         *.h++ \
+                         *.markdown \
+                         *.md \
+                         *.mm \
+                         *.dox
+
+ABBREVIATE_BRIEF       = "The $name class" \
+                         "The $name widget" \
+                         "The $name file" \
+                         is \
+                         provides \
+                         specifies \
+                         contains \
+                         represents \
+                         a \
+                         an \
+                         the
