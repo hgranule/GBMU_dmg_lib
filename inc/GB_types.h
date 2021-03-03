@@ -6,6 +6,7 @@
 #ifndef GB_TYPES_H_
 # define GB_TYPES_H_
 
+# include <cstddef>
 # include <cstdint>
 
 using U16   = uint16_t;
@@ -18,5 +19,11 @@ struct U8_8
     U8 h;
     U8 l;
 };
+
+using Word  = U16;  ///< 16-bit word type
+using Byte  = U8;   ///< 8-bit byte type
+using WordS = U8_8; ///< 16-bit word represented as 2 different bytes
+
+using CLKCycle = uint64_t; ///< type for representing clock cycles 
 
 #endif
