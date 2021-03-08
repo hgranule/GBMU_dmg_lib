@@ -1,0 +1,11 @@
+# !/bin/sh
+
+# import variables
+source $(cd "$(dirname "$0")"; pwd)/common.inc.sh
+
+DOC_DIR="$WORKSPACE_DIR/doc"
+DOXYFILE="$DOC_DIR/Doxyfile"
+DOCS="$DOC_DIR/html"
+
+rm -rf $DOCS
+doxygen $DOXYFILE

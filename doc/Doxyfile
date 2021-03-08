@@ -2,7 +2,7 @@ PROJECT_NAME           = "GBMU"
 PROJECT_NUMBER         = 0.0.1
 PROJECT_BRIEF          = "GameBoy simulator"
 OUTPUT_DIRECTORY       = doc
-INPUT                  = inc/ src/
+INPUT                  = include/ sources/
 GENERATE_LATEX         = NO
 
 EXTRACT_ANON_NSPACES   = YES

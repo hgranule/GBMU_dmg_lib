@@ -1,6 +1,6 @@
 /**
  * @file GB_macro.h
- * @brief File consist of macroses, constexpr functions and inline functions.
+ * @brief File consist of common useful macroses and inline functions.
  */
 
 #ifndef GB_MACRO_H_
@@ -23,8 +23,7 @@
  * @return Bitmask [_msbi:_lsbi]
  */
 constexpr inline uint32_t
-bit_mask(uint32_t msbi, uint32_t lsbi)
-{
+bit_mask(uint32_t msbi, uint32_t lsbi) {
     constexpr uint32_t bitsize = 32u;
     constexpr uint32_t filled32 = -1u;
     const uint32_t masksize = (msbi - lsbi) + 1;
@@ -40,8 +39,7 @@ bit_mask(uint32_t msbi, uint32_t lsbi)
  * @return Bits at range [msbi:lsbi] from bitset
  */
 constexpr inline uint32_t
-bit_slice(uint32_t msbi, uint32_t lsbi, uint32_t bitset) \
-{
+bit_slice(uint32_t msbi, uint32_t lsbi, uint32_t bitset) {
     return (bit_mask(msbi, lsbi) & bitset) >> lsbi;
 }
 
@@ -55,8 +53,7 @@ bit_slice(uint32_t msbi, uint32_t lsbi, uint32_t bitset) \
  * @return injected dst value
  */
 constexpr inline uint32_t
-bit_slice_inject(uint32_t msbi, uint32_t lsbi, uint32_t dst, uint32_t val)
-{
+bit_slice_inject(uint32_t msbi, uint32_t lsbi, uint32_t dst, uint32_t val) {
     const uint32_t bitmask = bit_mask(msbi , lsbi);
     const uint32_t bitslice = (val << lsbi) & bitmask;
 
@@ -70,8 +67,7 @@ bit_slice_inject(uint32_t msbi, uint32_t lsbi, uint32_t dst, uint32_t val)
  * @return true if bit is set
  */
 constexpr inline bool
-bit_n(uint32_t n, uint32_t bitset)
-{
+bit_n(uint32_t n, uint32_t bitset) {
     return bool(bitset & (1u << n));
 }
 
@@ -82,8 +78,7 @@ bit_n(uint32_t n, uint32_t bitset)
  * @return bitset with activated bit
  */
 constexpr inline uint32_t
-bit_n_set(uint32_t n, uint32_t bitset)
-{
+bit_n_set(uint32_t n, uint32_t bitset) {
     return bitset | (1u << n);
 }
 
@@ -94,14 +89,15 @@ bit_n_set(uint32_t n, uint32_t bitset)
  * @return bitset with disactivated bit
  */
 constexpr inline uint32_t
-bit_n_reset(uint32_t n, uint32_t bitset)
-{
+bit_n_reset(uint32_t n, uint32_t bitset) {
     return bitset & ~(1u << n);
 }
 
 
 namespace __internals_fast_lsb {
     /*  0100 1101 0111 1000 = 0x4D78 -> magick cycle sequence (MCS)
+     *  ^^^^ ^^^^ ^^^^ ^^^^
+     *  ^^^^^^^^^^^^^^^^^^^ <- de Buijin Sequence ( as I've fund out later )
      *
      *          N     2 1 0
      *    X X X 1 ... 0 0 0 -> N least significant bit mask (LSBM)
@@ -155,8 +151,7 @@ namespace __internals_fast_lsb {
  * @return return index of most significant bit or 32 if there is no set bits 
  */
 constexpr inline int
-bit_lsb(uint16_t bitset)
-{
+bit_lsb(uint16_t bitset) {
     using namespace __internals_fast_lsb;
 
     const uint16_t LSB_MASK = (bitset & -bitset);
