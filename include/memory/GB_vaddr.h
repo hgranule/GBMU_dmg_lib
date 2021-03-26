@@ -103,7 +103,6 @@ namespace GB::memory {
         HDMA3_VADDR     = 0xFF53,
         HDMA4_VADDR     = 0xFF54,
         HDMA5_VADDR     = 0xFF55,
-        HDMA5_VADDR     = 0xFF55,
 
         /* LCD color palletes */
         BCPS_VADDR      = 0xFF68,

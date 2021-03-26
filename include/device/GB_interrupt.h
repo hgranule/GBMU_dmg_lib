@@ -68,9 +68,9 @@ namespace GB {
              *       But if we set reserved bits, the LSB search returns index of first bit at reserved range [7:5] -> 5, that can
              *       be interpreted as NO_INTERRUPTS_TO_HADNLE.
              */
-            constexpr static Reg8 REG_RESERVED_BIT_MASK     = bit_mask(7,5);
-            constexpr static Reg8 REG_MEANINGFUL_BIT_MASK   = ~REG_RESERVED_BIT_MASK;
-            constexpr static Reg8 REG_RESERVED_BITS         = -1u & REG_RESERVED_BIT_MASK;
+            constexpr static unsigned REG_RESERVED_BIT_MASK     = bit_mask(7,5);
+            constexpr static unsigned REG_MEANINGFUL_BIT_MASK   = ~REG_RESERVED_BIT_MASK; /** @todo if i use uint8, compiler gives a warning */ 
+            constexpr static unsigned REG_RESERVED_BITS         = -1u & REG_RESERVED_BIT_MASK;
 
             Reg8    IE; ///< Interrupt enable register (all reserved bits must be 1)
             Reg8    IF; ///< Interrupt request register (all reserved bits must be 1)

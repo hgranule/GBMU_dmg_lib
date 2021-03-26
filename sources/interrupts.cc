@@ -1,4 +1,4 @@
-#include "GB_interrupt.h"
+#include "device/GB_interrupt.h"
 
 namespace GB {
 
@@ -53,19 +53,19 @@ namespace GB {
 
     // Memory mapping
 
-    static void MBusSetIF(IC* ic, Word addr, Byte val) {
+    static void MBusSetIF(IC* ic, Word, Byte val) {
         ic->SetIF(val);
     }
 
-    static void MBusGetIF(IC* ic, Word addr) {
+    static void MBusGetIF(IC* ic, Word) {
         ic->GetIF();
     }
 
-    static void MBusSetIE(IC* ic, Word addr, Byte val) {
+    static void MBusSetIE(IC* ic, Word, Byte val) {
         ic->SetIE(val);
     }
 
-    static void MBusGetIE(IC* ic, Word addr) {
+    static void MBusGetIE(IC* ic, Word) {
         ic->GetIE();
     }
 
