@@ -38,12 +38,22 @@ namespace GB::memory {
         using MemoryMap = FastDirectMMap;
 
     private:
-        sync::Action<MEMORY_ACCESS_PRICE_CLK>   __memAccessSyncDecorator;
-        MemoryMap                               __map;
+        devsync::Action<MEMORY_ACCESS_PRICE_CLK>    __memAccessSyncDecorator;
+        MemoryMap                                   __map;
 
     public:
 
-        inline void MapVAddr(Word vAddr, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection) {
+        inline void MapVAddr(Word vAddr1, Word vAddr2, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection = nullptr) {
+            for (
+                unsigned currentAddr = vAddr1, lastAddr = vAddr2;
+                currentAddr <= lastAddr;
+                ++currentAddr
+            ) {
+                MapVAddr(currentAddr, rFunc, wFunc, connection);
+            }
+        }
+
+        inline void MapVAddr(Word vAddr, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection = nullptr) {
             __map[vAddr] = MemMapEntry(rFunc, wFunc, connection);
         }
 

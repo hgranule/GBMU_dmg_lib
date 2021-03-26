@@ -12,6 +12,7 @@
 .vscode/
 .idea/
 
+bin/
 build/
 external/
 

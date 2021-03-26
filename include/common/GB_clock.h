@@ -19,7 +19,7 @@ operator "" _CLKCycles(unsigned long long cCycles) { return cCycles; }
 constexpr inline unsigned long long
 operator "" _MCycles(unsigned long long mCycles) { return mCycles * MCYCLE_TO_CLK_CYCLE; }
 
-namespace sync {
+namespace devsync {
 
     /**
      * @brief returns true when we have cycles to do something
@@ -113,11 +113,11 @@ namespace sync {
          */
         template <typename _Num, typename... _DeviceCallArgs>
         inline void Step(_Num deviceStepPay, _DeviceCallArgs... dCallArgs) {
-            if (::sync::Synced(__clock)) {
+            if (::devsync::Synced(__clock)) {
                 __device.Action(dCallArgs...);
-                ::sync::StepPay(__clock, deviceStepPay);
+                ::devsync::StepPay(__clock, deviceStepPay);
             }
-            ::sync::StepDone(__clock, _stepLong);
+            ::devsync::StepDone(__clock, _stepLong);
         }
 
         /**
@@ -130,9 +130,9 @@ namespace sync {
          */
         template <typename... _DeviceCallArgs>
         inline void Step(_DeviceCallArgs... dCallArgs) {
-            if (::sync::Synced(__clock))
+            if (::devsync::Synced(__clock))
                 __device.Action(__clock, dCallArgs...);
-            ::sync::StepDone(__clock, _stepLong);
+            ::devsync::StepDone(__clock, _stepLong);
         }
 
         /**
