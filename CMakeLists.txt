@@ -61,3 +61,4 @@ endmacro()
 # GameBoy library unit tests                                                   #
 ################################################################################
 ADD_GBMU_LIB_TEST(memory_bus_test "test/membus.cc")
+ADD_GBMU_LIB_TEST(interrupt_ctrl_test "test/interrupt_ctrl.cc")

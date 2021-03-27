@@ -51,7 +51,14 @@ namespace GB {
             JOYPAD_JMP
         }; 
 
-    private:
+        /** Create an interrupt gourp: interrupts<JOYPAD_INT, SERIO_INT, LCDSTAT_INT> => value for registers IE/IF */
+        template <InterruptIdx int_idx, InterruptIdx... other_int_idxies>
+        constexpr static unsigned interrupts = interrupts<int_idx> | interrupts<other_int_idxies...>;
+
+        template <InterruptIdx int_idx>
+        constexpr static unsigned interrupts<int_idx> = 1 << int_idx;
+
+    public:
 
         /**
          * @brief Interrupt controller registers
@@ -75,12 +82,29 @@ namespace GB {
             Reg8    IE; ///< Interrupt enable register (all reserved bits must be 1)
             Reg8    IF; ///< Interrupt request register (all reserved bits must be 1)
             bool    IME; ///< Interrupt Main Enable flag register
+
+
+            Registers(Reg8 valIE=0x00, Reg8 valIF=0x00, bool valIME=true)
+            : IE(valIE), IF(valIF), IME(valIME)
+            {
+            }
+
         };
 
     private:
         Registers           __registers;
 
     public:
+
+        InterruptController()
+        : __registers()
+        {
+        }
+
+        InterruptController(const Registers& regs)
+        : __registers(regs)
+        {
+        }
 
         /**
          * @brief Request some interrupt
@@ -129,6 +153,52 @@ namespace GB {
         void MapToMemory(memory::UMBus& memoryBus);
 
     };
+
+    inline void
+    InterruptController::RequestInt(InterruptController::InterruptIdx interrupt) {
+        __registers.IF = bit_n_set(interrupt, __registers.IF);
+    }
+
+    inline void
+    InterruptController::ResetInt(InterruptController::InterruptIdx interrupt) {
+        __registers.IF = bit_n_reset(interrupt, __registers.IF);
+    }
+
+    inline InterruptController::InterruptIdx
+    InterruptController::GetHighestPossibleInt() const {
+        const U8 interruptsToHandle = (__registers.IF & __registers.IE) | Registers::REG_RESERVED_BITS;
+        return InterruptIdx(bit_lsb(U16(interruptsToHandle)));
+    }
+
+    inline void
+    InterruptController::SetIE(Byte value) {
+        __registers.IE = value | Registers::REG_RESERVED_BITS;
+    }
+
+    inline Byte
+    InterruptController::GetIE() const {
+        return __registers.IE | Registers::REG_RESERVED_BITS;
+    }
+
+    inline void
+    InterruptController::SetIF(Byte value) {
+        __registers.IF = value | Registers::REG_RESERVED_BITS;
+    }
+
+    inline Byte
+    InterruptController::GetIF() const {
+        return __registers.IF | Registers::REG_RESERVED_BITS;
+    }
+
+    inline void
+    InterruptController::SetIME(bool value) {
+        __registers.IME = value;
+    }
+
+    inline bool
+    InterruptController::GetIME() const {
+        return __registers.IME;
+    }
 
 }
 
