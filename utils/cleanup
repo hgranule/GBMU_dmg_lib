@@ -4,3 +4,4 @@
 source $(cd "$(dirname "$0")"; pwd)/common.inc.sh
 
 rm -rf $WORKSPACE_DIR/a.out*
+rm -rf $CMAKE_BUILD_DIR/

@@ -30,7 +30,7 @@ namespace {
         }
     };
 
-    TEST(MemoryBus, simple) {
+    TEST(MemoryBus, SimpleMemoryMapDevice) {
         GB::memory::UMBus       memBus;
         SimpleMemMappedDevice   dev;
 
@@ -84,6 +84,100 @@ namespace {
         EXPECT_EQ(dev.registerB, 0xBD);
         EXPECT_EQ(memBus.ImmRead(0x1234), 0xAE);
         EXPECT_EQ(dev.registerA, 0xAE);
+    }
+}
+
+namespace {
+
+    using MemorySpace = std::array<Byte, GB::memory::UMBus::VIRTUAL_MEMORY_SIZE>;
+
+    struct VAddressSpace {
+        MemorySpace& memoryLink;
+
+        VAddressSpace(MemorySpace& memoryOrigin)
+        : memoryLink(memoryOrigin)
+        {
+        }
+
+        static Byte Read(VAddressSpace *dev, Word vAddr) {
+            return dev->memoryLink[vAddr];
+        }
+
+        static void Write(VAddressSpace *dev, Word vAddr, Byte data) {
+            dev->memoryLink[vAddr] = data;
+        }
+
+    };
+
+    void RandomVAGen(MemorySpace& space) {
+        for (auto& byte : space)
+            byte = static_cast<U8>(::bit_slice(7, 0, ::random()));
+    }
+
+    template <typename _Func>
+    void ForAllVirtualAddress(_Func func) {
+        for (unsigned vAddr = 0; vAddr < GB::memory::UMBus::VIRTUAL_MEMORY_SIZE; ++vAddr)
+            func(vAddr);
+    }
+
+    TEST(MemoryBus, FullAddressSpaceTest) {
+        GB::memory::UMBus       memBus;
+        MemorySpace             memorySpace;
+        VAddressSpace           vAddrSpace(memorySpace);
+
+        RandomVAGen(memorySpace);
+        memBus.MapVAddr(0x0000, 0xFFFF
+                        , GB::memory::UMBus::ReadCmd(VAddressSpace::Read)
+                        , GB::memory::UMBus::WriteCmd(VAddressSpace::Write)
+                        , &vAddrSpace);
+        
+        ForAllVirtualAddress([&](Word vAddr){
+            EXPECT_EQ(memorySpace[vAddr], memBus.ImmRead(vAddr));
+        });
+        
+        ForAllVirtualAddress([&](Word vAddr){
+            memBus.ImmWrite(vAddr, static_cast<Byte>(::bit_slice(7, 0, vAddr)) );
+        });
+
+        ForAllVirtualAddress([&](Word vAddr){
+            EXPECT_EQ(memorySpace[vAddr], static_cast<Byte>(::bit_slice(7, 0, vAddr)) );
+        });
+    }
+}
+
+namespace {
+
+    void DummyWrite(void*, Word, Byte) {
+    }
+
+    Byte DummyRead(void*, Word) {
+        return 0x42;
+    }
+
+    TEST(MemoryBus, DeviceSync) {
+        CLKCycle            clockCounter;
+        GB::memory::UMBus   memBus;
+
+        memBus.MapVAddr(0x0000,0xFFFF, DummyRead, DummyWrite);
+
+        memBus.Read(clockCounter, 0x0000); // -4 ticks
+        devsync::StepDone(clockCounter, GB::memory::UMBus::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
+        EXPECT_TRUE(devsync::Synced(clockCounter));
+
+        memBus.Write(clockCounter, 0x0001, 0x42); // -4 ticks
+        memBus.Write(clockCounter, 0x0002, 0x42); // -4 ticks
+        devsync::StepDone(clockCounter, GB::memory::UMBus::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
+        devsync::StepDone(clockCounter, GB::memory::UMBus::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
+        EXPECT_TRUE(devsync::Synced(clockCounter));
+
+        memBus.Write(clockCounter, 0x0003, 0x42); // -4 ticks
+        EXPECT_FALSE(devsync::Synced(clockCounter));
+        memBus.Read(clockCounter, 0x0004); // -4 ticks
+        EXPECT_FALSE(devsync::Synced(clockCounter));
+
+        devsync::StepDone(clockCounter, GB::memory::UMBus::MEMORY_ACCESS_PRICE_CLK);
+        devsync::StepDone(clockCounter, GB::memory::UMBus::MEMORY_ACCESS_PRICE_CLK);
+        EXPECT_TRUE(devsync::Synced(clockCounter));
     }
 
 }
