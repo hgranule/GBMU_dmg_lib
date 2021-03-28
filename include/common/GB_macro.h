@@ -160,4 +160,21 @@ bit_lsb(uint16_t bitset) {
     return LSB_CYCLE_TABLE[LSB_CYCLE_KEY];
 }
 
+/**
+ * @brief Get bitset containing given indexies
+ * @param[in] bit_indexies indexies of bits that must be set
+ * @return bitset
+ */
+template <typename _UnsignedType, typename... _Args>
+constexpr inline uint32_t
+bits_set(_UnsignedType bit_idx, _Args... bit_idxs) {
+    return (1u << bit_idx) | bits_set(bit_idxs...);
+}
+
+template <typename _UnsignedType>
+constexpr inline uint32_t
+bits_set(_UnsignedType bit_idx) {
+    return (1u << bit_idx);
+}
+
 #endif

@@ -14,7 +14,22 @@ execute_process(COMMAND mkdir -p    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 ################################################################################
 set(GBMU_LIB_INCLUDE_DIR "include")
 set(GBMU_LIB_SOURCES
+    "include/GB_config.h"
+
+    "include/common/GB_clock.h"
+    "include/common/GB_dbuffer.h"
+    "include/common/GB_macro.h"
+    "include/common/GB_types.h"
+
+    "include/memory/GB_vaddr.h"
+    "include/memory/GB_bus.h"
+
+    "include/device/GB_interrupt.h"
+    "include/device/GB_mboard.h"
+    "include/device/GB_wram.h"
+
     "sources/interrupts.cc"
+    "sources/wram.cc"
 )
 add_library(gbmu STATIC ${GBMU_LIB_SOURCES})
 target_include_directories(gbmu PUBLIC ${GBMU_LIB_INCLUDE_DIR})
@@ -60,5 +75,6 @@ endmacro()
 ################################################################################
 # GameBoy library unit tests                                                   #
 ################################################################################
-ADD_GBMU_LIB_TEST(memory_bus_test "test/membus.cc")
-ADD_GBMU_LIB_TEST(interrupt_ctrl_test "test/interrupt_ctrl.cc")
+ADD_GBMU_LIB_TEST(memory_bus_test       "test/membus.cc")
+ADD_GBMU_LIB_TEST(interrupt_ctrl_test   "test/interrupt_ctrl.cc")
+ADD_GBMU_LIB_TEST(wram_test             "test/wram.cc")

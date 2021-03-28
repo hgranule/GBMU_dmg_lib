@@ -29,6 +29,8 @@ using Word  = U16;  ///< 16-bit word type
 using Byte  = U8;   ///< 8-bit byte type
 using WordS = U8_8; ///< 16-bit word represented as 2 different bytes
 
+using Reg8 = Byte;
+
 using DBuff = DBuffer< std::allocator<U8> >; ///< Short name of dynamic buffer of bytes
 
 constexpr static auto K_BYTE_MULTI = 0x400ull;

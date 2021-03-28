@@ -134,4 +134,7 @@ namespace {
         EXPECT_EQ(GBINT::NO_INTERRUPT, interruptCTRL.GetHighestPossibleInt());
     }
 
+    TEST(InterruptController, MemBus) {
+        EXPECT_TRUE(false); //TODO
+    }
 }
