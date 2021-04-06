@@ -150,7 +150,7 @@ namespace GB {
         bool GetIME() const;
 
         /** Maps interrupt contoller registers IE and IF inside memory bus table */
-        void MapToMemory(memory::UMBus& memoryBus);
+        void MapToMemory(memory::BusInterface& memoryBus);
 
     };
 

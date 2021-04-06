@@ -73,18 +73,18 @@ namespace GB {
         dev->Write(innerAddr, data);
     }
 
-    void WRAM::MapToMemory(memory::UMBus& memoryBus) {
+    void WRAM::MapToMemory(memory::BusInterface& memoryBus) {
         memoryBus.MapVAddr( memory::SVBK_VADDR
-                          , memory::UMBus::ReadCmd(__MemReadSVBK)
-                          , memory::UMBus::WriteCmd(__MemWriteSVBK)
+                          , memory::BusInterface::ReadCmd(__MemReadSVBK)
+                          , memory::BusInterface::WriteCmd(__MemWriteSVBK)
                           , this);
         memoryBus.MapVAddr( memory::WRAM0_BASE_VADDR, memory::WRAMX_LAST_VADDR
-                          , memory::UMBus::ReadCmd(__MemBankRead)
-                          , memory::UMBus::WriteCmd(__MemBankWrite)
+                          , memory::BusInterface::ReadCmd(__MemBankRead)
+                          , memory::BusInterface::WriteCmd(__MemBankWrite)
                           , this);
         memoryBus.MapVAddr( memory::WRAM0_ECHO_BASE_VADDR, memory::WRAMX_ECHO_LAST_VADDR
-                          , memory::UMBus::ReadCmd(__MemBankEchoRead)
-                          , memory::UMBus::WriteCmd(__MemBankEchoWrite)
+                          , memory::BusInterface::ReadCmd(__MemBankEchoRead)
+                          , memory::BusInterface::WriteCmd(__MemBankEchoWrite)
                           , this);
     }
 

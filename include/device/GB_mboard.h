@@ -11,7 +11,7 @@ namespace GB {
     class MBoard {
     public:
     private:
-        memory::UMBus*          __memoryBus;
+        memory::BusInterface*   __memoryBus;
 
         WRAM*                   __wram;
         InterruptController*    __interruptController;

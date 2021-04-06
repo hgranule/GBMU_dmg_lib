@@ -14,7 +14,7 @@ namespace GB::memory {
     /**
      *  @brief United Memory Bus
      */
-    class UMBus {
+    class BusInterface {
     public:
         static constexpr size_t     VIRTUAL_MEMORY_SIZE = 0x10000ul;
         static constexpr CLKCycle   MEMORY_ACCESS_PRICE_CLK = 4_CLKCycles;
@@ -59,12 +59,12 @@ namespace GB::memory {
 
         inline void
         Write(CLKCycle& clock, Word vAddr, Byte data) {
-            __memAccessSyncDecorator(clock, &UMBus::ImmWrite, this, vAddr, data);
+            __memAccessSyncDecorator(clock, &BusInterface::ImmWrite, this, vAddr, data);
         }
 
         inline Byte
         Read(CLKCycle& clock, Word vAddr) {
-            return __memAccessSyncDecorator(clock, &UMBus::ImmRead, this, vAddr);
+            return __memAccessSyncDecorator(clock, &BusInterface::ImmRead, this, vAddr);
         }
 
         inline void

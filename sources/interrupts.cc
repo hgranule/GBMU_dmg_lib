@@ -3,7 +3,7 @@
 namespace GB {
 
     using IC    = InterruptController;
-    using Mbus  = memory::UMBus;
+    using Mbus  = memory::BusInterface;
 
     // Memory mapping
 

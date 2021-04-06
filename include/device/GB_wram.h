@@ -42,7 +42,7 @@ namespace GB {
         WRAM& operator=(const WRAM& other);
         WRAM& operator=(WRAM&& other);
 
-        void MapToMemory(memory::UMBus& memoryBus);
+        void MapToMemory(memory::BusInterface& memoryBus);
 
         inline unsigned __BankIdxBits() const {
             return ::bit_slice(2, 0, __regs.SVBK);

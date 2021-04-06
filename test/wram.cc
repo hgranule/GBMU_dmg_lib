@@ -97,7 +97,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank0) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -116,7 +116,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank1) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -161,7 +161,7 @@ namespace {
         });
     }
 
-    void TestMemBank(GB::memory::UMBus& mbus, GB::WRAM& wram, unsigned bank, Word address, Word dist) {
+    void TestMemBank(GB::memory::BusInterface& mbus, GB::WRAM& wram, unsigned bank, Word address, Word dist) {
         Word addr = address;
         Word distance = dist;
         Byte val = random();
@@ -181,7 +181,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank2) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -189,7 +189,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank3) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -197,7 +197,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank4) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -205,7 +205,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank5) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -213,7 +213,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank6) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -221,7 +221,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusBank7) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -234,7 +234,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusEchoBank0) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
@@ -276,7 +276,7 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusEchoBankX) {
-        GB::memory::UMBus   membus;
+        GB::memory::BusInterface   membus;
         GB::WRAM            wram;
 
         wram.MapToMemory(membus);
