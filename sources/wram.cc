@@ -3,7 +3,7 @@
 #include "memory/GB_vaddr.h"
 
 
-namespace GB {
+namespace GB::device {
 
     WRAM::WRAM()
     : __memory(MAX_SIZE)

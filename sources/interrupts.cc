@@ -1,9 +1,9 @@
 #include "device/GB_interrupt.h"
 
-namespace GB {
+namespace GB::device {
 
     using IC    = InterruptController;
-    using Mbus  = memory::BusInterface;
+    using Mbus  = ::GB::memory::BusInterface;
 
     // Memory mapping
 

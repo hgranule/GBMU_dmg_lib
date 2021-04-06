@@ -6,14 +6,16 @@
 
 namespace {
 
-    using Reg8 = GB::InterruptController::Reg8;
+    using InterruptController = GB::device::InterruptController;
+
+    using Reg8 = InterruptController::Reg8;
     
     Reg8 ReservedBits(Reg8 reg) {
-        return GB::InterruptController::Registers::REG_RESERVED_BITS | reg;
+        return InterruptController::Registers::REG_RESERVED_BITS | reg;
     }
 
     TEST(InterruptController, IE_SetGet) {
-        GB::InterruptController     interruptCTRL(GB::InterruptController::Registers(0x3, 0x0, false));
+        InterruptController     interruptCTRL(InterruptController::Registers(0x3, 0x0, false));
 
         // check initial values
         EXPECT_EQ(interruptCTRL.GetIE(), ReservedBits(0x3));
@@ -26,7 +28,7 @@ namespace {
     }
 
     TEST(InterruptController, IF_SetGet) {
-        GB::InterruptController     interruptCTRL(GB::InterruptController::Registers(0x0, 0x5, false));
+        InterruptController     interruptCTRL(InterruptController::Registers(0x0, 0x5, false));
 
         // check initial values
         EXPECT_EQ(interruptCTRL.GetIF(), ReservedBits(0x5));
@@ -39,7 +41,7 @@ namespace {
     }
 
     TEST(InterruptController, IME_SetGet) {
-        GB::InterruptController     interruptCTRL(GB::InterruptController::Registers(0x0, 0x0, true));
+        InterruptController     interruptCTRL(InterruptController::Registers(0x0, 0x0, true));
 
         // check initial values
         EXPECT_TRUE(interruptCTRL.GetIME());
@@ -58,7 +60,7 @@ namespace {
     }
 
     TEST(InterruptController, RequestResetInterrupt) {
-        using GBIC = GB::InterruptController;
+        using GBIC = InterruptController;
         using GBINT = GBIC::InterruptIdx;
 
         GBIC interruptCTRL(GBIC::Registers(0x0, 0x0, true));
@@ -95,7 +97,7 @@ namespace {
     }
 
     TEST(InterruptController, HighestPriorityInt) {
-        using GBIC = GB::InterruptController;
+        using GBIC = InterruptController;
         using GBINT = GBIC::InterruptIdx;
 
         constexpr Byte ALL_INTS = GBIC::interrupts<
@@ -137,7 +139,7 @@ namespace {
 
     TEST(InterruptController, MemBus) {
         GB::memory::BusInterface  membus;
-        GB::InterruptController   interruptCTRL;
+        InterruptController   interruptCTRL;
         
         interruptCTRL.MapToMemory(membus);
 

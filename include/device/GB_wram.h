@@ -14,7 +14,7 @@
 
 # include "GB_config.h"
 
-namespace GB {
+namespace GB::device {
 
     class WRAM {
     public:

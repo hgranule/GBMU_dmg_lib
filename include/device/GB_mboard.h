@@ -6,7 +6,7 @@
 # include "device/GB_interrupt.h"
 # include "device/GB_wram.h"
 
-namespace GB {
+namespace GB::device {
 
     class MBoard {
     public:

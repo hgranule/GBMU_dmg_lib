@@ -8,12 +8,14 @@
 
 namespace {
 
+    using WRAM = GB::device::WRAM;
+
     inline Byte SVBKReservedBits(Byte value) {
-        return value | GB::WRAM::Registers::RESERVED_BITS;
+        return value | WRAM::Registers::RESERVED_BITS;
     }
 
     TEST(WorkingRAM, SVBK_ReadWrite) {
-        GB::WRAM    wram;
+        WRAM    wram;
 
         EXPECT_EQ(SVBKReservedBits(GB::SVBK_INIT_VALUE), wram.GetSVBK());
 
@@ -28,7 +30,7 @@ namespace {
     }
 
     TEST(WorkingRAM, SVBK_BankChoose) {
-        GB::WRAM    wram;
+        WRAM    wram;
 
         wram.SetSVBK(0x0);
         EXPECT_EQ(1, wram.__CurrentBankIdx());
@@ -66,7 +68,7 @@ namespace {
 
     using VA = GB::memory::VirtualAddress;
 
-    constexpr unsigned BS = GB::WRAM::BANK_SIZE;
+    constexpr unsigned BS = WRAM::BANK_SIZE;
 
     inline unsigned DirectAddr(unsigned vAddr, unsigned svbkBank, unsigned minAddr, unsigned maxAddr) {
         EXPECT_TRUE(vAddr <= maxAddr);
@@ -98,7 +100,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank0) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
 
@@ -117,7 +119,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank1) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
 
@@ -161,7 +163,7 @@ namespace {
         });
     }
 
-    void TestMemBank(GB::memory::BusInterface& mbus, GB::WRAM& wram, unsigned bank, Word address, Word dist) {
+    void TestMemBank(GB::memory::BusInterface& mbus, WRAM& wram, unsigned bank, Word address, Word dist) {
         Word addr = address;
         Word distance = dist;
         Byte val = random();
@@ -182,7 +184,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank2) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
         TestMemBank(membus, wram, 2, VA::WRAMX_BASE_VADDR, BS);
@@ -190,7 +192,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank3) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
         TestMemBank(membus, wram, 3, VA::WRAMX_BASE_VADDR, BS);
@@ -198,7 +200,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank4) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
         TestMemBank(membus, wram, 4, VA::WRAMX_BASE_VADDR, BS);
@@ -206,7 +208,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank5) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
         TestMemBank(membus, wram, 5, VA::WRAMX_BASE_VADDR, BS);
@@ -214,7 +216,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank6) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
         TestMemBank(membus, wram, 6, VA::WRAMX_BASE_VADDR, BS);
@@ -222,7 +224,7 @@ namespace {
 
     TEST(WorkingRam, MemBusBank7) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
         TestMemBank(membus, wram, 7, VA::WRAMX_BASE_VADDR, BS);
@@ -235,7 +237,7 @@ namespace {
 
     TEST(WorkingRam, MemBusEchoBank0) {
         GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        WRAM                       wram;
 
         wram.MapToMemory(membus);
 
@@ -276,8 +278,8 @@ namespace {
     }
 
     TEST(WorkingRam, MemBusEchoBankX) {
-        GB::memory::BusInterface   membus;
-        GB::WRAM            wram;
+        GB::memory::BusInterface    membus;
+        WRAM                        wram;
 
         wram.MapToMemory(membus);
 

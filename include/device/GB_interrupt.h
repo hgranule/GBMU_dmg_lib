@@ -14,7 +14,7 @@
 # include "memory/GB_vaddr.h"
 # include "memory/GB_bus.h"
 
-namespace GB {
+namespace GB::device {
 
     /**
      * @brief Implementation of interrupt controller from GameBoy
