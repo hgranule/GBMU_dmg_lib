@@ -2,6 +2,7 @@
 #include "common/GB_macro.h"
 #include "device/GB_interrupt.h"
 #include "memory/GB_bus.h"
+#include "memory/GB_vaddr.h"
 
 namespace {
 
@@ -135,6 +136,27 @@ namespace {
     }
 
     TEST(InterruptController, MemBus) {
-        EXPECT_TRUE(false); //TODO
+        GB::memory::BusInterface  membus;
+        GB::InterruptController   interruptCTRL;
+        
+        interruptCTRL.MapToMemory(membus);
+
+        membus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x4);
+        EXPECT_EQ(ReservedBits(0x4), membus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
+        membus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x1);
+        EXPECT_EQ(ReservedBits(0x1), membus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
+        membus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x7);
+        EXPECT_EQ(ReservedBits(0x7), membus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
+        membus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x0);
+        EXPECT_EQ(ReservedBits(0x0), membus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
+
+        membus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x4);
+        EXPECT_EQ(ReservedBits(0x4), membus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
+        membus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x1);
+        EXPECT_EQ(ReservedBits(0x1), membus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
+        membus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x7);
+        EXPECT_EQ(ReservedBits(0x7), membus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
+        membus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x0);
+        EXPECT_EQ(ReservedBits(0x0), membus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
     }
 }
