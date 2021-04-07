@@ -8,8 +8,6 @@ namespace {
 
     using InterruptController = GB::device::InterruptController;
 
-    using Reg8 = InterruptController::Reg8;
-    
     Reg8 ReservedBits(Reg8 reg) {
         return InterruptController::Registers::REG_RESERVED_BITS | reg;
     }

@@ -10,11 +10,11 @@ namespace GB::device {
 
     class MBoard {
     public:
-    private:
-        memory::BusInterface*   __memoryBus;
+    protected:
+        ::GB::memory::BusInterface*     __memoryBus;
 
-        WRAM*                   __wram;
-        InterruptController*    __interruptController;
+        WRAM*                           __wram;
+        InterruptController*            __interruptController;
     };
 
 }

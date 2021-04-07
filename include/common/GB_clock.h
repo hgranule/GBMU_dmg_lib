@@ -68,7 +68,7 @@ namespace devsync {
      */
     template < class _Device, CLKCycle _stepLong = 1_MCycles >
     class SyncedDevice {
-    private:
+    protected:
         CLKCycle        __clock;
         _Device         __device;
 

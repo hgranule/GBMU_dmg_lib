@@ -22,13 +22,13 @@ public:
     using Reference = ValueType &;
     using ConstReference = const ValueType &;
 
-private:
+protected:
 
     _Allocator  __allocator;
     Pointer     __data;
     size_t      __len;
 
-private:
+protected:
 
     inline void __Free() {
         if (__data)

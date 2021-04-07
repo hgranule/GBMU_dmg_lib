@@ -6,6 +6,7 @@
 #ifndef GB_MEMORY_BUS_H_
 # define GB_MEMORY_BUS_H_
 
+# include "common/GB_clock.h"
 # include "common/GB_types.h"
 # include <array>
 
@@ -37,7 +38,7 @@ namespace GB::memory {
 
         using MemoryMap = FastDirectMMap;
 
-    private:
+    protected:
         devsync::Action<MEMORY_ACCESS_PRICE_CLK>    __memAccessSyncDecorator;
         MemoryMap                                   __map;
 

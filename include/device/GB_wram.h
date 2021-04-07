@@ -29,7 +29,7 @@ namespace GB::device {
         constexpr static unsigned MAX_SIZE = WRAM_CGB_SIZE;
         constexpr static unsigned BANK_SIZE = WRAM_CGB_BANK_SIZE;
 
-    private:
+    protected:
         DBuff       __memory;
         Registers   __regs;
 

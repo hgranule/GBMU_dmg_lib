@@ -22,8 +22,6 @@ namespace GB::device {
     class InterruptController {
     public:
 
-        using Reg8 = Byte;
-
         /** Interrupt bit offsets for IF and IE registers */
         enum InterruptIdx : U8 {
             VBLANK_INT = 0,     ///< Vertical blanking period
@@ -37,11 +35,11 @@ namespace GB::device {
 
         /** Interrupt handlers virtual addresses */
         enum InterruptAddr : U16 {
-            VBLANK_JMP = memory::VirtualAddress::VBLANK_JMP_VADDR,
-            LCDSTAT_JMP = memory::VirtualAddress::LCDSTAT_JMP_VADDR,
-            TIMOVER_JMP = memory::VirtualAddress::TIMOVER_JMP_VADDR,
-            SERIO_JMP = memory::VirtualAddress::SERIO_JMP_VADDR,
-            JOYPAD_JMP = memory::VirtualAddress::JOYPAD_JMP_VADDR
+            VBLANK_JMP  = ::GB::memory::VirtualAddress::VBLANK_JMP_VADDR,
+            LCDSTAT_JMP = ::GB::memory::VirtualAddress::LCDSTAT_JMP_VADDR,
+            TIMOVER_JMP = ::GB::memory::VirtualAddress::TIMOVER_JMP_VADDR,
+            SERIO_JMP   = ::GB::memory::VirtualAddress::SERIO_JMP_VADDR,
+            JOYPAD_JMP  = ::GB::memory::VirtualAddress::JOYPAD_JMP_VADDR
         };
 
         /** Maps interrupt bit index to interrupt handler virtual address */
@@ -52,11 +50,8 @@ namespace GB::device {
         }; 
 
         /** Create an interrupt gourp: interrupts<JOYPAD_INT, SERIO_INT, LCDSTAT_INT> => value for registers IE/IF */
-        template <InterruptIdx int_idx, InterruptIdx... other_int_idxies>
-        constexpr static unsigned interrupts = interrupts<int_idx> | interrupts<other_int_idxies...>;
-
-        template <InterruptIdx int_idx>
-        constexpr static unsigned interrupts<int_idx> = 1 << int_idx;
+        template <unsigned... _interruptIndexies>
+        constexpr static unsigned interrupts = ::bits_set(_interruptIndexies...);
 
     public:
 
@@ -75,7 +70,7 @@ namespace GB::device {
              *       But if we set reserved bits, the LSB search returns index of first bit at reserved range [7:5] -> 5, that can
              *       be interpreted as NO_INTERRUPTS_TO_HADNLE.
              */
-            constexpr static unsigned REG_RESERVED_BIT_MASK     = bit_mask(7,5);
+            constexpr static unsigned REG_RESERVED_BIT_MASK     = ::bit_mask(7,5);
             constexpr static unsigned REG_MEANINGFUL_BIT_MASK   = ~REG_RESERVED_BIT_MASK; /** @todo if i use uint8, compiler gives a warning */ 
             constexpr static unsigned REG_RESERVED_BITS         = -1u & REG_RESERVED_BIT_MASK;
 
@@ -91,7 +86,7 @@ namespace GB::device {
 
         };
 
-    private:
+    protected:
         Registers           __registers;
 
     public:
@@ -150,7 +145,7 @@ namespace GB::device {
         bool GetIME() const;
 
         /** Maps interrupt contoller registers IE and IF inside memory bus table */
-        void MapToMemory(memory::BusInterface& memoryBus);
+        void MapToMemory(::GB::memory::BusInterface& memoryBus);
 
     };
 

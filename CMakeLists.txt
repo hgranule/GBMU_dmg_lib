@@ -27,9 +27,11 @@ set(GBMU_LIB_SOURCES
     "include/device/GB_interrupt.h"
     "include/device/GB_mboard.h"
     "include/device/GB_wram.h"
+    "include/device/GB_joypad.h"
 
     "sources/interrupts.cc"
     "sources/wram.cc"
+    "sources/joypad.cc"
 )
 add_library(gbmu STATIC ${GBMU_LIB_SOURCES})
 target_include_directories(gbmu PUBLIC ${GBMU_LIB_INCLUDE_DIR})
@@ -78,3 +80,4 @@ endmacro()
 ADD_GBMU_LIB_TEST(memory_bus_test       "test/membus.cc")
 ADD_GBMU_LIB_TEST(interrupt_ctrl_test   "test/interrupt_ctrl.cc")
 ADD_GBMU_LIB_TEST(wram_test             "test/wram.cc")
+ADD_GBMU_LIB_TEST(joypad_test           "test/joypad.cc")
