@@ -139,7 +139,7 @@ namespace GB::device {
          * lines (P1X) have value which equals to 0.
          */
         const unsigned searchField = ~(static_cast<unsigned>(__pressedKeySet) << 4); // zero expand pressedKeys, shift it and then invert it
-        const unsigned searchWindowLsb = (unsigned(__p14) << 1) | unsigned(__p15);
+        const unsigned searchWindowLsb = ((unsigned(__p15) << 1) | unsigned(__p14)) * 4;
         return ::bit_slice(searchWindowLsb + 3, searchWindowLsb, searchField)
                | P1_RESERVED_BITS
                | unsigned(__p14) << P14
