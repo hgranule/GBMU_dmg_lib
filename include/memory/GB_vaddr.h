@@ -113,7 +113,7 @@ namespace GB::memory {
         /* OAM RAM */
         OAM_RAM_BASE_VADDR = 0xFE00,
         OAM_RAM_LAST_VADDR = 0xFE9F,
-        OAM_ECHO_BASE_VADDR = 0xFEA0, // NOTE: look at PanDocs to some additional info
+        OAM_ECHO_BASE_VADDR = 0xFEA0, //TODO: maybe we can map those address to our oam search result
         OAM_ECHO_LAST_VADDR = 0xFEFF,
 
         /* High stack RAM */
