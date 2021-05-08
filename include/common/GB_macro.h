@@ -3,8 +3,8 @@
  * @brief File consist of common useful macroses and inline functions.
  */
 
-#ifndef GB_MACRO_H_
-# define GB_MACRO_H_
+#ifndef COMMON_GB_MACRO_H_
+# define COMMON_GB_MACRO_H_
 
 # include <cstdint>
 
@@ -142,7 +142,7 @@ namespace __internals_fast_lsb {
         15,  4,  8, 10,
         14,  7, 13, 12
     };
-}
+}  // namespace __internals_fast_lsb
 
 
 /**
@@ -177,4 +177,4 @@ bits_set(_UnsignedType bit_idx, _Args... bit_idxs) {
     return (1u << bit_idx) | bits_set(bit_idxs...);
 }
 
-#endif
+#endif  // COMMON_GB_MACRO_H_

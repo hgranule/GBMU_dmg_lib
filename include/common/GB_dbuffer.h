@@ -3,157 +3,144 @@
  * @brief Describes dynamic buffer
  */
 
-#ifndef GB_DBUFFER_H_
-# define GB_DBUFFER_H_
+#ifndef COMMON_GB_DBUFFER_H_
+# define COMMON_GB_DBUFFER_H_
 
 # include <cstdint>
+# include <utility>
+# include <string>
 # include <memory>
 
 /**
  * @brief Dynamic allocated buffer with support of move-semantic
  */
-template < typename _Allocator = std::allocator<uint8_t> >
-class DBuffer {
-public:
+class dbuffer_t {
+ protected:
 
-    using ValueType = uint8_t;
-    using Pointer = ValueType *;
-    using ConstPointer = const ValueType *;
-    using Reference = ValueType &;
-    using ConstReference = const ValueType &;
-
-protected:
-
-    _Allocator  __allocator;
-    Pointer     __data;
+    uint8_t*    __data;
     size_t      __len;
 
-protected:
+ protected:
 
-    inline void __Free() {
+    inline static
+    uint8_t* __allocate(size_t n) {
+        return new uint8_t[n];
+    }
+
+    inline static void
+    __deallocate(uint8_t *data) {
+        delete[] data;
+    }
+
+    inline void __free() {
         if (__data)
-            __allocator.deallocate(__data, __len);
+            __deallocate(__data);
         __data = nullptr;
     }
 
-public:
+ public:
 
-    ~DBuffer() {
-        __Free();
+    ~dbuffer_t() {
+        __free();
     }
 
     /**
      * @brief Create and allocate dynamic buffer with some size
      * @param[in] size size (in bytes) to allocate for buffer data
      */
-    DBuffer(size_t size = 0ul)
-    : __allocator(_Allocator())
-    , __data(size != 0 ? __allocator.allocate(size) : nullptr)
-    , __len(size)
-    {
+    explicit
+    dbuffer_t(size_t size = 0ul)
+    : __data(size != 0 ? __allocate(size) : nullptr)
+    , __len(size) {
     }
 
     /**
      * @brief Create and allocate dynamic buffer with some content
-     * @param[in] extData address from which content will be copied
-     * @param[in] length size in bytes, to copy from extData
+     * @param[in] ext_data address from which content will be copied
+     * @param[in] length size in bytes, to copy from ext_data
      */
-    DBuffer(void* extData, size_t lenght)
-    : __allocator(_Allocator())
-    , __data(__allocator.allocate(lenght))
-    , __len(lenght)
-    {
-        memcpy(__data, extData, __len);
+    explicit
+    dbuffer_t(void* ext_data, size_t lenght)
+    : __data(__allocate(lenght))
+    , __len(lenght) {
+        memcpy(__data, ext_data, __len);
     }
 
     /**
      * @brief Create and allocate dynamic buffer with some content
      * @param[in] str string from which content will be copied
      */
-    DBuffer(const std::string& str)
-    : __allocator(_Allocator())
-    , __data(__allocator.allocate(str.length()))
-    , __len(str.length())
-    {
+    explicit
+    dbuffer_t(const std::string& str)
+    : __data(__allocate(str.length()))
+    , __len(str.length()) {
         memcpy(__data, str.data(), __len);
     }
 
-    DBuffer(const DBuffer& source)
-    : __allocator(source.__allocator)
-    , __data(__allocator.allocate(source.__len))
-    , __len(source.__len)
-    {
+    dbuffer_t(const dbuffer_t& source)
+    : __data(__allocate(source.__len))
+    , __len(source.__len) {
         memcpy(__data, source.__data, __len);
     }
 
-    DBuffer(DBuffer&& source)
-    : __allocator(std::move(source.__allocator))
-    , __data(std::move(source.__data))
-    , __len(std::move(source.__len))
-    {
+    dbuffer_t(dbuffer_t&& source) noexcept
+    : __data(std::move(source.__data))
+    , __len(std::move(source.__len)) {
         source.__data = nullptr;
         source.__len = 0;
     }
 
-    DBuffer& operator=(const DBuffer& source);
-    DBuffer& operator=(DBuffer&& source);
+    dbuffer_t& operator=(const dbuffer_t& source) {
+        if (this != &source) {
+            __free();
+            __data = __allocate(source.__len);
+            __len = source.__len;
+            memcpy(__data, source.__data, __len);
+        }
+        return *this;
+    }
+
+    dbuffer_t& operator=(dbuffer_t&& source) noexcept {
+        if (this != &source) {
+            __free();
+            __data = std::move(source.__data);
+            __len = std::move(source.__len);
+
+            source.__data = nullptr;
+            source.__len = 0;
+        }
+        return *this;
+    }
+
 
     /**
      * @brief get address of buffers data
      */
-    inline Pointer Data() {
+    inline uint8_t* get_data_addr() {
         return __data;
     }
 
     /**
      * @brief get address of buffers data
      */
-    inline ConstPointer Data() const {
+    inline uint8_t* get_data_addr() const {
         return __data;
     }
 
     /**
      * @brief get access to byte at some offset
      */
-    inline Reference operator[](size_t offset) {
+    inline uint8_t& operator[](size_t offset) {
         return __data[offset];
     }
 
     /**
      * @brief get access to byte at some offset
      */
-    inline ConstReference operator[](size_t offset) const {
+    inline const uint8_t& operator[](size_t offset) const {
         return __data[offset];
     }
 
 };
 
-template <typename _Allocator>
-auto DBuffer<_Allocator>::operator=(const DBuffer& source) -> DBuffer&
-{
-    if (this != &source) {
-        __Free();
-        __allocator = source.__allocator;
-        __data = __allocator.allocate(source.__len);
-        __len = source.__len;
-        memcpy(__data, source.__data, __len);
-    }
-    return *this;
-}
-
-template <typename _Allocator>
-auto DBuffer<_Allocator>::operator=(DBuffer&& source) -> DBuffer&
-{
-    if (this != &source) {
-        __Free();
-        __allocator = std::move(source.__allocator);
-        __data = std::move(source.__data);
-        __len = std::move(source.__len);
-
-        source.__data = nullptr;
-        source.__len = 0;
-    }
-    return *this;
-}
-
-#endif
+#endif  // COMMON_GB_DBUFFER_H_

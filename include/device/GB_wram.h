@@ -3,8 +3,8 @@
  * @brief ...
  */
 
-#ifndef GB_WRAM_H_
-# define GB_WRAM_H_
+#ifndef DEVICE_GB_WRAM_H_
+# define DEVICE_GB_WRAM_H_
 
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
@@ -16,91 +16,92 @@
 
 namespace GB::device {
 
-    class WRAM {
-    public:
-        struct Registers {
-            constexpr static unsigned RESERVED_BITS = ::bits_set(6);
+class WRAM {
+ public:
+    struct Registers {
+        constexpr static unsigned RESERVED_BITS = ::bits_set(6);
 
-            Reg8    SVBK;
+        Reg8    SVBK;
 
-            Registers(Reg8 svbkInitValue = SVBK_INIT_VALUE) : SVBK(svbkInitValue) {}
-        };
-
-        constexpr static unsigned MAX_SIZE = WRAM_CGB_SIZE;
-        constexpr static unsigned BANK_SIZE = WRAM_CGB_BANK_SIZE;
-
-    protected:
-        DBuff       __memory;
-        Registers   __regs;
-
-    public:
-        WRAM();
-        WRAM(const WRAM& other);
-        WRAM(WRAM&& other);
-        ~WRAM();
-
-        WRAM& operator=(const WRAM& other);
-        WRAM& operator=(WRAM&& other);
-
-        void MapToMemory(memory::BusInterface& memoryBus);
-
-        inline unsigned __BankIdxBits() const {
-            return ::bit_slice(2, 0, __regs.SVBK);
-        }
-
-        inline unsigned __CurrentBankIdx() const {
-            const unsigned bankBits = __BankIdxBits();
-            return (bankBits == 0x0) ? 0x1 : bankBits;
-        }
-
-        inline unsigned __DirectAddress(Word innerAddr) const {
-            const unsigned bankIdx = (innerAddr >= memory::WRAMX_BASE_VADDR)
-                                   ? __CurrentBankIdx() : 0x0;
-            const unsigned bankOffset = innerAddr % BANK_SIZE;
-            return (bankIdx * BANK_SIZE) + bankOffset;
-        }
-
-        inline Byte GetSVBK() const;
-        inline void SetSVBK(Byte value);
-
-        inline Byte Read(Word innerAddr) const;
-        inline void Write(Word innerAddr, Byte data);
-
-        inline Byte DirectRead(Word directAddr) const;
-        inline void DirectWrite(Word directAddr, Byte data);
-
+        explicit
+        Registers(Reg8 svbk_init_val = SVBK_INIT_VALUE) : SVBK(svbk_init_val) {}
     };
 
-    inline Byte
-    WRAM::GetSVBK() const {
-        return __regs.SVBK | Registers::RESERVED_BITS;
+    constexpr static unsigned MAX_SIZE = WRAM_CGB_SIZE;
+    constexpr static unsigned BANK_SIZE = WRAM_CGB_BANK_SIZE;
+
+ protected:
+    dbuffer_t   __memory;
+    Registers   __regs;
+
+ public:
+    ~WRAM();
+    WRAM();
+    WRAM(const WRAM& other);
+    WRAM(WRAM&& other);
+
+    WRAM& operator=(const WRAM& other);
+    WRAM& operator=(WRAM&& other);
+
+    void map_to_memory(memory::BusInterface& mem_bus);
+
+    inline u32 __get_bank_idx_bits() const {
+        return ::bit_slice(2, 0, __regs.SVBK);
     }
 
-    inline void
-    WRAM::SetSVBK(Byte value) {
-        __regs.SVBK = value | Registers::RESERVED_BITS;
+    inline u32 __get_current_bank_idx() const {
+        const u32 bank_bits = __get_bank_idx_bits();
+        return (bank_bits == 0x0) ? 0x1 : bank_bits;
     }
 
-    inline Byte
-    WRAM::Read(Word inputAddr) const {
-        return DirectRead(__DirectAddress(inputAddr));
+    inline u32 __calc_phys_address(word_t laddr) const {
+        const u32 bankIdx = (laddr >= memory::WRAMX_BASE_VADDR)
+                                ? __get_current_bank_idx() : 0x0;
+        const u32 bankOffset = laddr % BANK_SIZE;
+        return (bankIdx * BANK_SIZE) + bankOffset;
     }
 
-    inline void
-    WRAM::Write(Word inputAddr, Byte data) {
-        DirectWrite(__DirectAddress(inputAddr), data);
-    }
+    inline byte_t get_SVBK_reg() const;
+    inline void set_SVBK_reg(byte_t value);
 
-    inline Byte
-    WRAM::DirectRead(Word directAddr) const {
-        return __memory[directAddr];
-    }
+    inline byte_t read_logic_addr(word_t laddr_stripped) const;
+    inline void write_logic_addr(word_t laddr_stripped, byte_t data);
 
-    inline void
-    WRAM::DirectWrite(Word directAddr, Byte data) {
-        __memory[directAddr] = data;
-    }
+    inline byte_t read_phys_addr(word_t phys_addr) const;
+    inline void write_phys_addr(word_t phys_addr, byte_t data);
 
+};
+
+inline byte_t
+WRAM::get_SVBK_reg() const {
+    return __regs.SVBK | Registers::RESERVED_BITS;
 }
 
-#endif
+inline void
+WRAM::set_SVBK_reg(byte_t value) {
+    __regs.SVBK = value | Registers::RESERVED_BITS;
+}
+
+inline byte_t
+WRAM::read_logic_addr(word_t laddr) const {
+    return read_phys_addr(__calc_phys_address(laddr));
+}
+
+inline void
+WRAM::write_logic_addr(word_t laddr, byte_t data) {
+    write_phys_addr(__calc_phys_address(laddr), data);
+}
+
+inline byte_t
+WRAM::read_phys_addr(word_t direct_addr) const {
+    return __memory[direct_addr];
+}
+
+inline void
+WRAM::write_phys_addr(word_t direct_addr, byte_t data) {
+    __memory[direct_addr] = data;
+}
+
+}  // namespace GB::device
+
+#endif  // DEVICE_GB_WRAM_H_
