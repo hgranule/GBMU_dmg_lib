@@ -1,0 +1,13 @@
+Function/Method names are       - UNIX_CASE
+Local variables                 - UNIX_CASE
+Types/Enums                     - CAMEL_CASE
+Namespaces                      - UNIX_CASE
+C-like or some std-like types   - UNIX_CASE
+
+Structs when you want to make a Functor or a Carry data class
+Classes for complex incapsulated things
+
+
+TODO:   - GB_bus.h
+        - GB_config.h
+        - GB_mboard.h

@@ -5,28 +5,28 @@
 namespace {
 
     struct SimpleMemMappedDevice {
-        U8     registerA;
-        U8     registerB;
+        u8     registerA;
+        u8     registerB;
 
-        static Byte ReadA(SimpleMemMappedDevice* dev, Word) {
+        static byte_t ReadA(SimpleMemMappedDevice* dev, word_t) {
             return dev->registerA;
         }
 
-        static Byte ReadB(SimpleMemMappedDevice* dev, Word) {
+        static byte_t ReadB(SimpleMemMappedDevice* dev, word_t) {
             return dev->registerB;
         }
 
-        static void Write(SimpleMemMappedDevice* dev, Word addr, Byte data) {
-            Byte& devRegister = (addr < 0x8000)
+        static void Write(SimpleMemMappedDevice* dev, word_t addr, byte_t data) {
+            byte_t& devRegister = (addr < 0x8000)
                                 ? dev->registerA : dev->registerB;
             devRegister = data;
         }
 
-        static Byte UndefinedRead(SimpleMemMappedDevice*, Word) {
+        static byte_t UndefinedRead(SimpleMemMappedDevice*, word_t) {
             return 0x42;
         }
 
-        static void UndefinedWrite(SimpleMemMappedDevice*, Word, Byte) {
+        static void UndefinedWrite(SimpleMemMappedDevice*, word_t, byte_t) {
         }
     };
 
@@ -89,7 +89,7 @@ namespace {
 
 namespace {
 
-    using MemorySpace = std::array<Byte, GB::memory::BusInterface::VIRTUAL_MEMORY_SIZE>;
+    using MemorySpace = std::array<byte_t, GB::memory::BusInterface::VIRTUAL_MEMORY_SIZE>;
 
     struct VAddressSpace {
         MemorySpace& memoryLink;
@@ -99,11 +99,11 @@ namespace {
         {
         }
 
-        static Byte Read(VAddressSpace *dev, Word vAddr) {
+        static byte_t Read(VAddressSpace *dev, word_t vAddr) {
             return dev->memoryLink[vAddr];
         }
 
-        static void Write(VAddressSpace *dev, Word vAddr, Byte data) {
+        static void Write(VAddressSpace *dev, word_t vAddr, byte_t data) {
             dev->memoryLink[vAddr] = data;
         }
 
@@ -111,7 +111,7 @@ namespace {
 
     void RandomVAGen(MemorySpace& space) {
         for (auto& byte : space)
-            byte = static_cast<U8>(::bit_slice(7, 0, ::random()));
+            byte = static_cast<u8>(::bit_slice(7, 0, ::random()));
     }
 
     template <typename _Func>
@@ -131,53 +131,53 @@ namespace {
                         , GB::memory::BusInterface::WriteCmd(VAddressSpace::Write)
                         , &vAddrSpace);
         
-        ForAllVirtualAddress([&](Word vAddr){
+        ForAllVirtualAddress([&](word_t vAddr){
             EXPECT_EQ(memorySpace[vAddr], memBus.ImmRead(vAddr));
         });
         
-        ForAllVirtualAddress([&](Word vAddr){
-            memBus.ImmWrite(vAddr, static_cast<Byte>(::bit_slice(7, 0, vAddr)) );
+        ForAllVirtualAddress([&](word_t vAddr){
+            memBus.ImmWrite(vAddr, static_cast<byte_t>(::bit_slice(7, 0, vAddr)) );
         });
 
-        ForAllVirtualAddress([&](Word vAddr){
-            EXPECT_EQ(memorySpace[vAddr], static_cast<Byte>(::bit_slice(7, 0, vAddr)) );
+        ForAllVirtualAddress([&](word_t vAddr){
+            EXPECT_EQ(memorySpace[vAddr], static_cast<byte_t>(::bit_slice(7, 0, vAddr)) );
         });
     }
 }
 
 namespace {
 
-    void DummyWrite(void*, Word, Byte) {
+    void DummyWrite(void*, word_t, byte_t) {
     }
 
-    Byte DummyRead(void*, Word) {
+    byte_t DummyRead(void*, word_t) {
         return 0x42;
     }
 
     TEST(MemoryBus, DeviceSync) {
-        CLKCycle            clockCounter;
+        clk_cycle_t            clockCounter;
         GB::memory::BusInterface   memBus;
 
         memBus.MapVAddr(0x0000,0xFFFF, DummyRead, DummyWrite);
 
         memBus.Read(clockCounter, 0x0000); // -4 ticks
-        devsync::StepDone(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
-        EXPECT_TRUE(devsync::Synced(clockCounter));
+        devsync::step(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
+        EXPECT_TRUE(devsync::is_ready(clockCounter));
 
         memBus.Write(clockCounter, 0x0001, 0x42); // -4 ticks
         memBus.Write(clockCounter, 0x0002, 0x42); // -4 ticks
-        devsync::StepDone(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
-        devsync::StepDone(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
-        EXPECT_TRUE(devsync::Synced(clockCounter));
+        devsync::step(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
+        devsync::step(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK); // +4 ticks
+        EXPECT_TRUE(devsync::is_ready(clockCounter));
 
         memBus.Write(clockCounter, 0x0003, 0x42); // -4 ticks
-        EXPECT_FALSE(devsync::Synced(clockCounter));
+        EXPECT_FALSE(devsync::is_ready(clockCounter));
         memBus.Read(clockCounter, 0x0004); // -4 ticks
-        EXPECT_FALSE(devsync::Synced(clockCounter));
+        EXPECT_FALSE(devsync::is_ready(clockCounter));
 
-        devsync::StepDone(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK);
-        devsync::StepDone(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK);
-        EXPECT_TRUE(devsync::Synced(clockCounter));
+        devsync::step(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK);
+        devsync::step(clockCounter, GB::memory::BusInterface::MEMORY_ACCESS_PRICE_CLK);
+        EXPECT_TRUE(devsync::is_ready(clockCounter));
     }
 
 }

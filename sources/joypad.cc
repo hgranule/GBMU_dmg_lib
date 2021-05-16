@@ -4,19 +4,19 @@
 
 namespace GB::device {
 
-    static Byte MemBusGetP1(JoyPad* jp, Word) {
-        return jp->GetP1();
+    static byte_t read_P1_reg(JoyPad* jp, word_t) {
+        return jp->get_P1_reg();
     }
 
-    static void MemBusSetP1(JoyPad* jp, Word, Byte data) {
-        jp->SetP1(data);
+    static void write_P1_reg(JoyPad* jp, word_t, byte_t data) {
+        jp->set_P1_reg(data);
     }
 
-    void JoyPad::MapToMemory(::GB::memory::BusInterface& memBus) {
-        memBus.MapVAddr( ::GB::memory::VirtualAddress::P1_VADDR
-                       , ::GB::memory::BusInterface::ReadCmd(&MemBusGetP1)
-                       , ::GB::memory::BusInterface::WriteCmd(&MemBusSetP1)
+    void JoyPad::map_to_memory(::GB::memory::BusInterface& mem_bus) {
+        mem_bus.MapVAddr(::GB::memory::VirtualAddress::P1_VADDR
+                       , ::GB::memory::BusInterface::ReadCmd(&read_P1_reg)
+                       , ::GB::memory::BusInterface::WriteCmd(&write_P1_reg)
                        , this);
     }
 
-}
+}  // namespace GB::device

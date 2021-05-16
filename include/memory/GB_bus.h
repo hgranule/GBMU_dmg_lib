@@ -18,11 +18,11 @@ namespace GB::memory {
     class BusInterface {
     public:
         static constexpr size_t     VIRTUAL_MEMORY_SIZE = 0x10000ul;
-        static constexpr CLKCycle   MEMORY_ACCESS_PRICE_CLK = 4_CLKCycles;
+        static constexpr clk_cycle_t   MEMORY_ACCESS_PRICE_CLK = 4_CLKCycles;
 
         using ConnectorPtr  = void*;
-        using WriteCmd      = void (*)(ConnectorPtr memCtx, Word addr, Byte data);
-        using ReadCmd       = Byte (*)(ConnectorPtr memCtx, Word addr);
+        using WriteCmd      = void (*)(ConnectorPtr memCtx, word_t addr, byte_t data);
+        using ReadCmd       = byte_t (*)(ConnectorPtr memCtx, word_t addr);
 
         struct MemMapEntry {
             ReadCmd         readCmd; ///< read command function
@@ -44,7 +44,7 @@ namespace GB::memory {
 
     public:
 
-        inline void MapVAddr(Word vAddr1, Word vAddr2, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection = nullptr) {
+        inline void MapVAddr(word_t vAddr1, word_t vAddr2, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection = nullptr) {
             for (
                 unsigned currentAddr = vAddr1, lastAddr = vAddr2;
                 currentAddr <= lastAddr;
@@ -54,28 +54,28 @@ namespace GB::memory {
             }
         }
 
-        inline void MapVAddr(Word vAddr, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection = nullptr) {
+        inline void MapVAddr(word_t vAddr, ReadCmd rFunc, WriteCmd wFunc, ConnectorPtr connection = nullptr) {
             __map[vAddr] = MemMapEntry(rFunc, wFunc, connection);
         }
 
         inline void
-        Write(CLKCycle& clock, Word vAddr, Byte data) {
+        Write(clk_cycle_t& clock, word_t vAddr, byte_t data) {
             __memAccessSyncDecorator(clock, &BusInterface::ImmWrite, this, vAddr, data);
         }
 
-        inline Byte
-        Read(CLKCycle& clock, Word vAddr) {
+        inline byte_t
+        Read(clk_cycle_t& clock, word_t vAddr) {
             return __memAccessSyncDecorator(clock, &BusInterface::ImmRead, this, vAddr);
         }
 
         inline void
-        ImmWrite(Word vAddr, Byte data) {
+        ImmWrite(word_t vAddr, byte_t data) {
             auto [_, wCmd, connected] = __map[vAddr];
             wCmd(connected, vAddr, data);
         }
 
-        inline Byte
-        ImmRead(Word vAddr) {
+        inline byte_t
+        ImmRead(word_t vAddr) {
             auto [rCmd, _, connected] = __map[vAddr];
             return rCmd(connected, vAddr);
         }
