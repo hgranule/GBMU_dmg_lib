@@ -113,8 +113,8 @@ enum VirtualAddress : word_t {
     /* OAM RAM */
     OAM_RAM_BASE_VADDR = 0xFE00,
     OAM_RAM_LAST_VADDR = 0xFE9F,
-    OAM_ECHO_BASE_VADDR = 0xFEA0,  // NOTE: look at PanDocs to some additional info
-    OAM_ECHO_LAST_VADDR = 0xFEFF,
+    OAM_ECHO_BASE_VADDR = 0xFEA0,  // NOTE: There is article with behavior for UNUSED_AFTER_OAM memory
+    OAM_ECHO_LAST_VADDR = 0xFEFF,  //       https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (2.10)
 
     /* High stack RAM */
     HRAM_BASE_VADDR = 0xFF80,
