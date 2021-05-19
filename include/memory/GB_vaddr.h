@@ -113,8 +113,10 @@ enum VirtualAddress : word_t {
     /* OAM RAM */
     OAM_RAM_BASE_VADDR = 0xFE00,
     OAM_RAM_LAST_VADDR = 0xFE9F,
-    OAM_ECHO_BASE_VADDR = 0xFEA0,  // NOTE: There is article with behavior for UNUSED_AFTER_OAM memory
-    OAM_ECHO_LAST_VADDR = 0xFEFF,  //       https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (2.10)
+    OAM_ECHO_BASE_VADDR = 0xFEA0,   // NOTE: There is article with behavior for UNUSED_AFTER_OAM memory
+    OAM_ECHO_LAST_VADDR = 0xFEFF,   //       https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (2.10)
+                                    // TODO(dolovnyak, hgranule): I want to create device GB_echo_oram in the future,
+                                    //                            for correct implementation of read/write behavior
 
     /* High stack RAM */
     HRAM_BASE_VADDR = 0xFF80,
