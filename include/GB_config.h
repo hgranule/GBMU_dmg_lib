@@ -16,12 +16,15 @@ namespace GB {
 
     constexpr unsigned SVBK_INIT_VALUE = 0x0;
 
+    constexpr unsigned ORAM_OBJECTS_NUM = 40;
+    constexpr unsigned ORAM_SIZE = ORAM_OBJECTS_NUM * 4_Bytes;
+
     enum GBModeFlag : u16 {
         DMG_MODE = 0b000001,
         MGB_MODE = 0b000010,
         CGB_MODE = 0b001000,
     };
 
-};
+}  // namespace GB
 
-#endif
+#endif  // GB_CONFIG_H_

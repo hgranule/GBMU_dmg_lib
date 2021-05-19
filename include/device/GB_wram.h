@@ -54,6 +54,9 @@ class WRAM {
         return (bank_bits == 0x0) ? 0x1 : bank_bits;
     }
 
+    // TODO(hgranule) fix to correct codestyle
+    // also suggest replace out of class all inline methods implementations or, conversely, include all
+    // also suggest rename to __calc_phys_addr(word_t inner_vaddr)
     inline u32 __calc_phys_address(word_t laddr) const {
         const u32 bankIdx = (laddr >= memory::WRAMX_BASE_VADDR)
                                 ? __get_current_bank_idx() : 0x0;
@@ -64,6 +67,7 @@ class WRAM {
     inline byte_t get_SVBK_reg() const;
     inline void set_SVBK_reg(byte_t value);
 
+    // TODO(hgranule) rename to read/write_inner_vaddr(word_t inner_vaddr)
     inline byte_t read_logic_addr(word_t laddr_stripped) const;
     inline void write_logic_addr(word_t laddr_stripped, byte_t data);
 

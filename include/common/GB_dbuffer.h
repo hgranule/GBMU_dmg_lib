@@ -60,7 +60,7 @@ class dbuffer_t {
      * @param[in] length size in bytes, to copy from ext_data
      */
     explicit
-    dbuffer_t(void* ext_data, size_t lenght)
+    dbuffer_t(void* ext_data, size_t lenght)  // TODO(hgranule) rename to length
     : __data(__allocate(lenght))
     , __len(lenght) {
         memcpy(__data, ext_data, __len);
@@ -112,6 +112,19 @@ class dbuffer_t {
         return *this;
     }
 
+    /**
+     * @brief get allocated memory size
+     */
+    inline size_t size() const {
+        return __len;
+    }
+
+    /**
+     * @brief get allocated memory length
+     */
+    inline size_t length() const {
+        return __len;
+    }
 
     /**
      * @brief get address of buffers data

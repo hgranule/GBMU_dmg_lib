@@ -8,6 +8,8 @@
 *.out
 *.exe
 *dSYM*
+*.swp
+*.DS_Store
 
 .vscode/
 .idea/
@@ -18,4 +20,4 @@ external/
 
 doc/html/
 
-.DS_Store
+*cmake-build-debug/
