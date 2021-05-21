@@ -1,6 +1,3 @@
-#include <utility>
-#include <algorithm>
-
 #include "gtest/gtest.h"
 
 #include "GB_config.h"

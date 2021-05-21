@@ -10,20 +10,28 @@
 
 namespace GB {
 
-    constexpr unsigned WRAM_CGB_BANK_SIZE = 4_KBytes;
-    constexpr unsigned WRAM_CGB_SIZE = 32_KBytes;
-    constexpr unsigned WRAM_NON_CGB_SIZE = 8_KBytes;
+constexpr unsigned WRAM_CGB_BANK_SIZE = 4_KBytes;
+constexpr unsigned WRAM_CGB_SIZE = 32_KBytes;
+constexpr unsigned WRAM_NON_CGB_SIZE = 8_KBytes;
 
-    constexpr unsigned SVBK_INIT_VALUE = 0x0;
+constexpr unsigned SVBK_INIT_VALUE = 0x0;
+constexpr unsigned VBK_INIT_VALUE = 0x0;
 
-    constexpr unsigned ORAM_OBJECTS_NUM = 40;
-    constexpr unsigned ORAM_SIZE = ORAM_OBJECTS_NUM * 4_Bytes;
+constexpr unsigned ORAM_OBJECTS_NUM = 40;
+constexpr unsigned ORAM_SIZE = ORAM_OBJECTS_NUM * 4_Bytes;
 
-    enum GBModeFlag : u16 {
-        DMG_MODE = 0b000001,
-        MGB_MODE = 0b000010,
-        CGB_MODE = 0b001000,
-    };
+constexpr unsigned VRAM_BANK_SIZE = 8_KBytes;
+constexpr unsigned VRAM_NON_CGB_SIZE = VRAM_BANK_SIZE;
+constexpr unsigned VRAM_CGB_SIZE = VRAM_BANK_SIZE * 2;
+constexpr unsigned VRAM_MAX_SIZE = VRAM_CGB_SIZE;
+
+
+enum GBModeFlag : u16 {
+    DMG_MODE = 0b000001,
+    MGB_MODE = 0b000010,
+    CGB_DMG_MODE = 0b000100,
+    CGB_MODE = 0b001000
+};
 
 }  // namespace GB
 
