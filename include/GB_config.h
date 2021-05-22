@@ -17,6 +17,10 @@ constexpr unsigned WRAM_NON_CGB_SIZE = 8_KBytes;
 constexpr unsigned SVBK_INIT_VALUE = 0x0;
 constexpr unsigned VBK_INIT_VALUE = 0x0;
 
+constexpr unsigned INTC_IF_INIT_VALUE = 0x0;
+constexpr unsigned INTC_IE_INIT_VALUE = 0x0;
+constexpr bool INTC_IME_INIT_VALUE = true;
+
 constexpr unsigned ORAM_OBJECTS_NUM = 40;
 constexpr unsigned ORAM_SIZE = ORAM_OBJECTS_NUM * 4_Bytes;
 

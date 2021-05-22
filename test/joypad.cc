@@ -1,40 +1,34 @@
 #include "gtest/gtest.h"
 
+#include "GB_test.h"
+
 #include "common/GB_macro.h"
 #include "device/GB_joypad.h"
-#include "memory/GB_bus.h"
 #include "memory/GB_vaddr.h"
 
 namespace {
 
 using JoyPad = GB::device::JoyPad;
 using IntController = GB::device::InterruptController;
-using MemBus = GB::memory::BusInterface;
 using Vaddr = GB::memory::VirtualAddress;
-
-class JoyPadMock: public JoyPad {
- public:
-    explicit
-    JoyPadMock(IntController* ic_link)
-    : JoyPad(ic_link) {
-    }
-
-    byte_t __get_pressed_keys() const {
-        return this->__pressed_key_set;
-    }
-
-    void __reset_keys() {
-        this->__pressed_key_set = 0;
-    }
-};
 
 Reg8 set_P1_reserved_bits(Reg8 reg) {
     return JoyPad::P1_RESERVED_BITS | reg;
 }
 
-TEST(Joypad, KeyManagment) {
-    JoyPadMock      jp(NULL);
-    byte_t            key_set;
+TEST(Joy_Pad, Initialization) {
+    JoyPad      jp(nullptr);
+
+    EXPECT_EQ(true, jp.__p14);
+    EXPECT_EQ(false, jp.__p15);
+    EXPECT_EQ(nullptr, jp.__interrupt_link);
+    EXPECT_EQ(0x0, jp.__pressed_key_set);
+    EXPECT_EQ(0x0, jp.__previous_step_key_set);
+}
+
+TEST(Joy_Pad, Key_Managment) {
+    JoyPad      jp(nullptr);
+    byte_t      key_set;
 
     jp.press_key(JoyPad::A_KEY);
     jp.press_key(JoyPad::B_KEY);
@@ -42,14 +36,14 @@ TEST(Joypad, KeyManagment) {
     jp.press_key(JoyPad::LF_KEY);
 
     key_set = ::bits_set(JoyPad::A_KEY, JoyPad::B_KEY, JoyPad::UP_KEY, JoyPad::LF_KEY);
-    EXPECT_EQ(key_set, jp.__get_pressed_keys());
+    EXPECT_EQ(key_set, jp.__pressed_key_set);
 
     jp.press_key(JoyPad::A_KEY);
     jp.press_key(JoyPad::DW_KEY);
     jp.press_key(JoyPad::SC_KEY);
 
     key_set |= ::bits_set(JoyPad::A_KEY, JoyPad::DW_KEY, JoyPad::SC_KEY);
-    EXPECT_EQ(key_set, jp.__get_pressed_keys());
+    EXPECT_EQ(key_set, jp.__pressed_key_set);
 
     jp.unpress_key(JoyPad::SC_KEY);
     jp.unpress_key(JoyPad::ST_KEY);
@@ -57,25 +51,25 @@ TEST(Joypad, KeyManagment) {
     jp.unpress_key(JoyPad::LF_KEY);
 
     key_set = key_set & ~(::bits_set(JoyPad::SC_KEY, JoyPad::ST_KEY, JoyPad::B_KEY, JoyPad::LF_KEY));
-    EXPECT_EQ(key_set, jp.__get_pressed_keys());
+    EXPECT_EQ(key_set, jp.__pressed_key_set);
 
-    jp.__reset_keys();
+    jp.__pressed_key_set = 0x0;  // reset pressed keys set
 
     key_set = 0;
-    EXPECT_EQ(key_set, jp.__get_pressed_keys());
+    EXPECT_EQ(key_set, jp.__pressed_key_set);
 
     jp.press_key(JoyPad::RT_KEY);
     jp.press_key(JoyPad::ST_KEY);
 
     key_set = ::bits_set(JoyPad::RT_KEY, JoyPad::ST_KEY);
-    EXPECT_EQ(key_set, jp.__get_pressed_keys());
+    EXPECT_EQ(key_set, jp.__pressed_key_set);
 
 }
 
-TEST(Joypad, MatrixLineP1) {
-    JoyPadMock      jp(NULL);
+TEST(Joy_Pad, Matrix_Line_P1) {
+    JoyPad      jp(nullptr);
 
-    jp.__reset_keys();
+    jp.__pressed_key_set = 0x0;  // reset pressed keys set
     jp.set_P1_reg(0b100000);
     EXPECT_EQ(set_P1_reserved_bits(0b101111), jp.get_P1_reg());
 
@@ -106,7 +100,7 @@ TEST(Joypad, MatrixLineP1) {
     jp.set_P1_reg(0b000000);
     EXPECT_EQ(set_P1_reserved_bits(0b001111), jp.get_P1_reg());
 
-    jp.__reset_keys();
+    jp.__pressed_key_set = 0x0;  // reset pressed keys set
     jp.press_key(JoyPad::A_KEY);
     jp.set_P1_reg(0b010000);
     EXPECT_EQ(set_P1_reserved_bits(0b011110), jp.get_P1_reg());
@@ -116,9 +110,9 @@ static constexpr unsigned NO_JP_IF_VAL      = IntController::Registers::REG_RESE
 static constexpr unsigned RAISED_JP_IF_VAL  = ::bits_set(IntController::JOYPAD_INT)
                                             | NO_JP_IF_VAL;
 
-TEST(Joypad, Interrupts) {
+TEST(Joy_Pad, Interrupts) {
     IntController   int_ctrl;
-    JoyPadMock      jp(&int_ctrl);
+    JoyPad          jp(&int_ctrl);
 
     jp.press_key(JoyPad::A_KEY);
     jp.step();
@@ -148,31 +142,6 @@ TEST(Joypad, Interrupts) {
     jp.press_key(JoyPad::ST_KEY);
     jp.step();
     EXPECT_EQ(RAISED_JP_IF_VAL, int_ctrl.get_IF_reg());
-}
-
-TEST(Joypad, MemoryMapping) {
-    MemBus      mbus;
-    JoyPadMock  jp(NULL);
-
-    jp.map_to_memory(mbus);
-    jp.press_key(JoyPad::A_KEY);
-    jp.press_key(JoyPad::B_KEY);
-    jp.press_key(JoyPad::SC_KEY);
-    mbus.ImmWrite(Vaddr::P1_VADDR, 0b010000);
-    EXPECT_EQ(set_P1_reserved_bits(0b011000), mbus.ImmRead(Vaddr::P1_VADDR));
-    jp.unpress_key(JoyPad::A_KEY);
-    EXPECT_EQ(set_P1_reserved_bits(0b011001), mbus.ImmRead(Vaddr::P1_VADDR));
-
-    jp.press_key(JoyPad::UP_KEY);
-    jp.press_key(JoyPad::DW_KEY);
-    jp.press_key(JoyPad::LF_KEY);
-    jp.press_key(JoyPad::RT_KEY);
-    mbus.ImmWrite(Vaddr::P1_VADDR, 0b100000);
-    EXPECT_EQ(set_P1_reserved_bits(0b100000), mbus.ImmRead(Vaddr::P1_VADDR));
-    jp.unpress_key(JoyPad::RT_KEY);
-    EXPECT_EQ(set_P1_reserved_bits(0b100001), mbus.ImmRead(Vaddr::P1_VADDR));
-    jp.unpress_key(JoyPad::LF_KEY);
-    EXPECT_EQ(set_P1_reserved_bits(0b100011), mbus.ImmRead(Vaddr::P1_VADDR));
 }
 
 }  // namespace

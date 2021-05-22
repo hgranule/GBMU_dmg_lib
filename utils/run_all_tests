@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# import variables
+source $(cd "$(dirname "$0")"; pwd)/common.inc.sh
+
+# collect all unit tests binaries
+UNIT_TESTS=${CMAKE_OUTPUT_DIR}/*_test
+
+# make them
+
+# run every test
+for unit_test_exe in ${UNIT_TESTS}
+do
+    COLOR_SET="\x1b[33;1m"
+    COLOR_RESET="\x1b[0m"
+    HEADER="========================================================="
+    UNIT_TEST=`basename ${unit_test_exe}`
+
+    printf "\n\n${COLOR_SET}${HEADER}\n| Compiling test:  %$((${#HEADER} - 21))s |\n${HEADER}${COLOR_RESET}\n" ${UNIT_TEST}
+    make -C ${CMAKE_BUILD_DIR} ${UNIT_TEST}
+
+    printf "${COLOR_SET}${HEADER}\n| Running test:  %$((${#HEADER} - 19))s |\n${HEADER}${COLOR_RESET}\n" ${UNIT_TEST}
+    if !(exec ${unit_test_exe} $@);
+    then
+        printf "Test failed, exiting ..."
+        exit 1;
+    fi
+done
+
+printf "\n\n"

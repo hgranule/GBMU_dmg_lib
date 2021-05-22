@@ -7,12 +7,8 @@
 #ifndef DEVICE_GB_JOYPAD_H_
 # define DEVICE_GB_JOYPAD_H_
 
-# include <atomic>
-
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
-
-# include "memory/GB_bus.h"
 
 # include "device/GB_interrupt.h"
 
@@ -49,16 +45,17 @@ class JoyPad {
     bool                    __p14;
     bool                    __p15;
 
+ protected:
+    void __raise_interrupt();
+
  public:
 
     explicit
-    JoyPad(InterruptController* ic_link)  : __interrupt_link(ic_link)
+    JoyPad(InterruptController* ic_link = nullptr)  : __interrupt_link(ic_link)
                                         , __previous_step_key_set(0)
                                         , __pressed_key_set(0)
                                         , __p14(true)
                                         , __p15(false) {}
-
-    void __raise_interrupt();
 
     void unpress_key(KeyIdx keyIdx);
     void press_key(KeyIdx keyIdx);
@@ -67,8 +64,6 @@ class JoyPad {
     byte_t get_P1_reg() const;
 
     void step();
-
-    void map_to_memory(::GB::memory::BusInterface& mem_bus);
 
 };
 
