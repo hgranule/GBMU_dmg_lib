@@ -84,8 +84,8 @@ class InterruptController {
         explicit
         Registers(Reg8 val_IE = ::GB::INTC_IE_INIT_VALUE
                 , Reg8 val_IF = ::GB::INTC_IF_INIT_VALUE
-                , bool val_IME = ::GB::INTC_IME_INIT_VALUE
-        ) : IE(val_IE), IF(val_IF), IME(val_IME) {}
+                , bool val_IME = ::GB::INTC_IME_INIT_VALUE)
+        : IE(val_IE), IF(val_IF), IME(val_IME) {}
 
     };
 

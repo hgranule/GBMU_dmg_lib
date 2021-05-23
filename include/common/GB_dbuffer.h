@@ -9,7 +9,7 @@
 # include <cstdint>
 # include <utility>
 # include <string>
-# include <memory>
+# include <cstring>
 
 /**
  * @brief Dynamic allocated buffer with support of move-semantic
@@ -63,7 +63,7 @@ class dbuffer_t {
     dbuffer_t(void* ext_data, size_t length)
     : __data(__allocate(length))
     , __len(length) {
-        memcpy(__data, ext_data, __len);
+        std::memcpy(__data, ext_data, __len);
     }
 
     /**
@@ -74,13 +74,13 @@ class dbuffer_t {
     dbuffer_t(const std::string& str)
     : __data(__allocate(str.length()))
     , __len(str.length()) {
-        memcpy(__data, str.data(), __len);
+        std::memcpy(__data, str.data(), __len);
     }
 
     dbuffer_t(const dbuffer_t& source)
     : __data(__allocate(source.__len))
     , __len(source.__len) {
-        memcpy(__data, source.__data, __len);
+        std::memcpy(__data, source.__data, __len);
     }
 
     dbuffer_t(dbuffer_t&& source) noexcept
@@ -95,7 +95,7 @@ class dbuffer_t {
             __free();
             __data = __allocate(source.__len);
             __len = source.__len;
-            memcpy(__data, source.__data, __len);
+            std::memcpy(__data, source.__data, __len);
         }
         return *this;
     }
