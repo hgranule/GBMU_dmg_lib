@@ -8,8 +8,6 @@
 
 # include <cstddef>
 # include <cstdint>
-# include <memory>
-# include <string>
 
 # include "common/GB_dbuffer.h"
 
@@ -31,16 +29,16 @@ constexpr static auto K_BYTE_MULTI = 0x400ull;
 constexpr static auto M_BYTE_MULTI = K_BYTE_MULTI * K_BYTE_MULTI;
 constexpr static auto G_BYTE_MULTI = M_BYTE_MULTI * K_BYTE_MULTI;
 
-constexpr inline u64
-operator "" _Bytes(u64 bytes) { return bytes; }
+constexpr inline unsigned long long int
+operator "" _Bytes(unsigned long long int bytes) { return bytes; }
 
-constexpr inline u64
-operator "" _KBytes(u64 k_bytes) { return k_bytes * K_BYTE_MULTI; }
+constexpr inline unsigned long long int
+operator "" _KBytes(unsigned long long int k_bytes) { return k_bytes * K_BYTE_MULTI; }
 
-constexpr inline u64
-operator "" _MBytes(u64 m_bytes) { return m_bytes * M_BYTE_MULTI; }
+constexpr inline unsigned long long int
+operator "" _MBytes(unsigned long long int m_bytes) { return m_bytes * M_BYTE_MULTI; }
 
-constexpr inline u64
-operator "" _GBytes(u64 g_bytes) { return g_bytes * G_BYTE_MULTI; }
+constexpr inline unsigned long long int
+operator "" _GBytes(unsigned long long int g_bytes) { return g_bytes * G_BYTE_MULTI; }
 
 #endif  // COMMON_GB_TYPES_H_

@@ -17,7 +17,7 @@ namespace {
 
     TEST(Interrupt_Controller, Initialization) {
         InterruptController     int_ctrl;
-    
+
         EXPECT_EQ(GB::INTC_IME_INIT_VALUE, int_ctrl.__registers.IME);
         EXPECT_EQ(GB::INTC_IF_INIT_VALUE, int_ctrl.__registers.IF);
         EXPECT_EQ(GB::INTC_IE_INIT_VALUE, int_ctrl.__registers.IE);
