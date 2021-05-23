@@ -22,10 +22,8 @@ set(GBMU_LIB_SOURCES
         "include/common/GB_types.h"
 
         "include/memory/GB_vaddr.h"
-        "include/memory/GB_bus.h"
 
         "include/device/GB_interrupt.h"
-        "include/device/GB_mboard.h"
         "include/device/GB_wram.h"
         "include/device/GB_joypad.h"
         "include/device/GB_oram.h"
@@ -70,6 +68,7 @@ macro(ADD_GBMU_LIB_TEST TNAME)
     add_executable(${TNAME} ${ARGN})
     target_link_libraries(${TNAME} gtest gtest_main gbmu)
     target_include_directories(${TNAME} PUBLIC ${GOOGLETEST_INCLUDE})
+    target_compile_definitions(${TNAME} PUBLIC UNIT_TEST_)
     add_test(NAME ${TNAME}
             COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TNAME} --gtest_print_time=0
             WORKING_DIRECTORY ${TEST_DIR})
@@ -79,7 +78,6 @@ endmacro()
 ################################################################################
 # GameBoy library unit tests                                                   #
 ################################################################################
-ADD_GBMU_LIB_TEST(memory_bus_test       "test/membus.cc")
 ADD_GBMU_LIB_TEST(interrupt_ctrl_test   "test/interrupt.cc")
 ADD_GBMU_LIB_TEST(wram_test             "test/wram.cc")
 ADD_GBMU_LIB_TEST(joypad_test           "test/joypad.cc")

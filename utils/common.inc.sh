@@ -2,3 +2,4 @@
 SCRIPT_DIR=$(cd "$(dirname "$0")"; pwd)
 WORKSPACE_DIR=$(dirname $SCRIPT_DIR)
 CMAKE_BUILD_DIR="$WORKSPACE_DIR/build"
+CMAKE_OUTPUT_DIR="$WORKSPACE_DIR/bin"

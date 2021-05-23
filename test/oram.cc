@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
-#define protected public    // TODO(dolovnyak): When tests will be upgraded maybe remove it.
+#define protected public    // TODO(dolovnyak): Use #include "GB_test.h" now
+
 #include "device/GB_oram.h"
 
 namespace {

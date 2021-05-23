@@ -8,11 +8,12 @@
 #ifndef DEVICE_GB_INTERRUPT_H_
 # define DEVICE_GB_INTERRUPT_H_
 
+# include "GB_config.h"
+
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
 
 # include "memory/GB_vaddr.h"
-# include "memory/GB_bus.h"
 
 namespace GB::device {
 
@@ -81,9 +82,10 @@ class InterruptController {
 
 
         explicit
-        Registers(Reg8 val_IE = 0x00, Reg8 val_IF = 0x00, bool val_IME = true)
-        : IE(val_IE), IF(val_IF), IME(val_IME) {
-        }
+        Registers(Reg8 val_IE = ::GB::INTC_IE_INIT_VALUE
+                , Reg8 val_IF = ::GB::INTC_IF_INIT_VALUE
+                , bool val_IME = ::GB::INTC_IME_INIT_VALUE
+        ) : IE(val_IE), IF(val_IF), IME(val_IME) {}
 
     };
 
@@ -92,14 +94,8 @@ class InterruptController {
 
  public:
 
-    InterruptController()
-    : __registers() {
-    }
-
     explicit
-    InterruptController(const Registers& regs)
-    : __registers(regs) {
-    }
+    InterruptController(const Registers& regs = Registers()) : __registers(regs) {}
 
     /**
      * @brief Request some interrupt
@@ -143,9 +139,6 @@ class InterruptController {
 
     /** Get IME register */
     bool get_IME_reg() const;
-
-    /** Maps interrupt contoller registers IE and IF inside memory bus table */
-    void map_to_memory(::GB::memory::BusInterface& mem_bus);
 
 };
 

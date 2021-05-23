@@ -60,9 +60,9 @@ class dbuffer_t {
      * @param[in] length size in bytes, to copy from ext_data
      */
     explicit
-    dbuffer_t(void* ext_data, size_t lenght)  // TODO(hgranule) rename to length
-    : __data(__allocate(lenght))
-    , __len(lenght) {
+    dbuffer_t(void* ext_data, size_t length)
+    : __data(__allocate(length))
+    , __len(length) {
         memcpy(__data, ext_data, __len);
     }
 

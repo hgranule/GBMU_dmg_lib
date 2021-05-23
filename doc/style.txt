@@ -6,8 +6,3 @@ C-like or some std-like types   - UNIX_CASE
 
 Structs when you want to make a Functor or a Carry data class
 Classes for complex incapsulated things
-
-
-TODO:   - GB_bus.h
-        - GB_config.h
-        - GB_mboard.h

@@ -1,7 +1,10 @@
 #include "gtest/gtest.h"
+
+#include "GB_test.h"
+#include "GB_config.h"
+
 #include "common/GB_macro.h"
 #include "device/GB_interrupt.h"
-#include "memory/GB_bus.h"
 #include "memory/GB_vaddr.h"
 
 namespace {
@@ -12,7 +15,15 @@ namespace {
         return InterruptController::Registers::REG_RESERVED_BITS | reg;
     }
 
-    TEST(InterruptController, IE_SetGet) {
+    TEST(Interrupt_Controller, Initialization) {
+        InterruptController     int_ctrl;
+    
+        EXPECT_EQ(GB::INTC_IME_INIT_VALUE, int_ctrl.__registers.IME);
+        EXPECT_EQ(GB::INTC_IF_INIT_VALUE, int_ctrl.__registers.IF);
+        EXPECT_EQ(GB::INTC_IE_INIT_VALUE, int_ctrl.__registers.IE);
+    }
+
+    TEST(Interrupt_Controller, IE_Set_Get) {
         InterruptController     int_ctrl(InterruptController::Registers(0x3, 0x0, false));
 
         // check initial values
@@ -25,7 +36,7 @@ namespace {
         EXPECT_EQ(int_ctrl.get_IE_reg(), int_ctrl_reserved_bits(0xF));
     }
 
-    TEST(InterruptController, IF_SetGet) {
+    TEST(InterruptController, IF_Set_Get) {
         InterruptController     int_ctrl(InterruptController::Registers(0x0, 0x5, false));
 
         // check initial values
@@ -38,7 +49,7 @@ namespace {
         EXPECT_EQ(int_ctrl.get_IF_reg(), int_ctrl_reserved_bits(0xAA));
     }
 
-    TEST(InterruptController, IME_SetGet) {
+    TEST(Interrupt_Controller, IME_Set_Get) {
         InterruptController     int_ctrl(InterruptController::Registers(0x0, 0x0, true));
 
         // check initial values
@@ -57,7 +68,7 @@ namespace {
         EXPECT_FALSE(int_ctrl.get_IME_reg());
     }
 
-    TEST(InterruptController, RequestResetInterrupt) {
+    TEST(Interrupt_Controller, Request_Reset_Interrupt) {
         using IntController = InterruptController;
         using IntIdx = IntController::InterruptIdx;
 
@@ -93,7 +104,7 @@ namespace {
             int_ctrl_reserved_bits(0x0));
     }
 
-    TEST(InterruptController, HighestPriorityInt) {
+    TEST(Interrupt_Controller, Highest_Priority_Interrupt) {
         using IntController = InterruptController;
         using IntIdx = IntController::InterruptIdx;
 
@@ -132,31 +143,6 @@ namespace {
         int_ctrl.reset_interrupt(IntIdx::JOYPAD_INT);
 
         EXPECT_EQ(IntIdx::NO_INTERRUPT, int_ctrl.get_highest_priority_interrupt());
-    }
-
-    TEST(InterruptController, MemBus) {
-        GB::memory::BusInterface    mem_bus;
-        InterruptController         int_ctrl;
-
-        int_ctrl.map_to_memory(mem_bus);
-
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x4);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x4), mem_bus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x1);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x1), mem_bus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x7);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x7), mem_bus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IF_VADDR, 0x0);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x0), mem_bus.ImmRead(GB::memory::VirtualAddress::IF_VADDR));
-
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x4);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x4), mem_bus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x1);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x1), mem_bus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x7);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x7), mem_bus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
-        mem_bus.ImmWrite(GB::memory::VirtualAddress::IE_VADDR, 0x0);
-        EXPECT_EQ(int_ctrl_reserved_bits(0x0), mem_bus.ImmRead(GB::memory::VirtualAddress::IE_VADDR));
     }
 
 }  // namespace
