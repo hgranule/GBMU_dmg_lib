@@ -28,6 +28,8 @@ set(GBMU_LIB_SOURCES
         "include/device/GB_joypad.h"
         "include/device/GB_oram.h"
         "include/device/GB_vram.h"
+        "include/device/GB_sound.h"
+        "include/device/GB_sound_channel_1.h"
 
         "sources/interrupt.cc"
         "sources/wram.cc"
