@@ -28,10 +28,12 @@ set(GBMU_LIB_SOURCES
         "include/device/GB_joypad.h"
         "include/device/GB_oram.h"
         "include/device/GB_vram.h"
+        "include/device/GB_ppu.h"
 
         "sources/interrupt.cc"
         "sources/wram.cc"
         "sources/joypad.cc"
+        "sources/ppu.cc"
 )
 add_library(gbmu STATIC ${GBMU_LIB_SOURCES})
 target_include_directories(gbmu PUBLIC ${GBMU_LIB_INCLUDE_DIR})
@@ -83,3 +85,4 @@ ADD_GBMU_LIB_TEST(wram_test             "test/wram.cc")
 ADD_GBMU_LIB_TEST(joypad_test           "test/joypad.cc")
 ADD_GBMU_LIB_TEST(oram_test             "test/oram.cc")
 ADD_GBMU_LIB_TEST(vram_test             "test/vram.cc")
+ADD_GBMU_LIB_TEST(ppu_test              "test/ppu.cc")

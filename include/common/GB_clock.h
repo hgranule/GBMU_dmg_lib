@@ -1,6 +1,6 @@
 /**
  * @file GB_clock.h
- * @brief File describes some functionallity to deal with clock cycles
+ * @brief File describes some functionality to deal with clock cycles
  */
 
 #ifndef COMMON_GB_CLOCK_H_
@@ -14,7 +14,7 @@ using clk_cycle_t = int64_t;  ///< type for representing clock cycles
 constexpr static auto MCYCLE_TO_CLK_CYCLE = 0x4;
 
 constexpr inline uint64_t
-operator "" _CLKCycles(uint64_t cCycles) { return cCycles; }
+operator "" _CLKCycles(uint64_t cCycles) { return cCycles; }    // TODO(hgranule) code style
 
 constexpr inline uint64_t
 operator "" _MCycles(uint64_t mCycles) { return mCycles * MCYCLE_TO_CLK_CYCLE; }
@@ -46,7 +46,7 @@ step(clk_cycle_t& clock, clk_cycle_t ccls) {
 }
 
 /**
- * @brief counter class whihc counts passed cycles and could be used for action sycnronization
+ * @brief counter class which counts passed cycles and could be used for action synchronization
  */
 class counter_t {
  protected:
