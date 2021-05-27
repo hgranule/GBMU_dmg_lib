@@ -42,7 +42,7 @@ void PPU::hblank_to_endline_transition() {
     set_STAT_mode(STAT_Hblank);
 
     __current_state = State::EndLine;
-    __counter.step(SCANLINE_TIME - OAM_SEARCH_TIME - __render_time - ENDLINE_TIME);
+    __counter.step(SCANLINE_TIME - ORAM_SEARCH_TIME - __render_time - ENDLINE_TIME);
 }
 
 void PPU::render_to_hblank_transition() {
@@ -63,25 +63,60 @@ void PPU::render_to_hblank_transition() {
 //                  https://gbdev.io/pandocs/STAT.html (In section properties STAT mode)
 //                  https://habr.com/ru/post/155323/ (In section LCDMODE_LYXX_OAM)
 
-// TODO(dolovnyak)  maybe in the future replace finding objects into render_to_hblank_transition, because oam busy
-//                  in both modes and it's data doesn't change. And also it will allow implement conflict with
-//                  DMA search which started during OAM search.
+// TODO(dolovnyak)  if accurate timings will be founded remake to accurate steps
 /**
  * @details:    * Set STAT mode to searching OAM.
- *              * Request OAM_SEARCH interrupt if there is necessary STAT flag, and this is the first scanline interrupt
- *                (only one interrupt could be requested during scanline).
+ *              * Request OAM_SEARCH interrupt if there is necessary STAT flag
+ (only one interrupt could be requested during scanline).
  *              * Check and set LY=LYC (It should be in the start of scanline).
  *              * Request LY=LYC interrupt if there is necessary STAT flag, and this is the first scanline interrupt.
  *              * Find objects (maximum first ten).
  *              * Calculate __render_time depending on found objects and SCX register.
  */
-void PPU::search_to_render_transition() {
+void PPU::add_intersected_object_if_possible() {
+    // TODO(dolovnyak)  if (__dma.running)
+    //                      return;
+    if (__intersected_objects.size() == MAX_INTERSECTED_OBJECTS)
+        return;
+
+    u8 object_height = ::bit_n(2, __regs.LCDC) ? LARGE_OBJECT_HEIGHT : NORMAL_OBJECT_HEIGHT;
+    // TODO(dolovnyak) ugly way to get object
+    const PPU::Object& current_object = reinterpret_cast<PPU::Object*>
+            (__oram->get_memory_buffer_ref().get_data_addr())[__current_searching_object];
+
+    if (__regs.LY - object_height >= current_object.pos_y - OBJECT_Y_INDENT &&
+        __regs.LY < current_object.pos_y - OBJECT_Y_INDENT) {
+        __intersected_objects.push_back(current_object);
+    }
+}
+
+void PPU::first_search_to_search_transition() {
     set_STAT_mode(STAT_SearchingOAM);
-    // find objects
-    // calculate render_time
+
+    //TODO(dolovnyak, hgranule) throw OAM_SEARCHING interrupt if it's possible.
+    //TODO(dolovnyak, hgranule) throw LY=LYC interrupt if it's needed.
+
+    __current_searching_object = 0;
+    __intersected_objects.clear();
+    add_intersected_object_if_possible();
+
+    ++__current_searching_object;
+    __current_state = State::Search;
+    __counter.step(OBJECT_SEARCH_TIME);
+}
+
+void PPU::search_to_search_transition() {
+    add_intersected_object_if_possible();
+
+    ++__current_searching_object;
+    __counter.step(OBJECT_SEARCH_TIME);
+}
+
+void PPU::search_to_render_transition() {
+    add_intersected_object_if_possible();
 
     __current_state = State::Render;
-    __counter.step(OAM_SEARCH_TIME);
+    __counter.step(OBJECT_SEARCH_TIME);
 }
 
 void PPU::step() {
@@ -90,8 +125,11 @@ void PPU::step() {
         return;
     }
     switch (__current_state) {
+        case State::FirstSearch:
+            first_search_to_search_transition();
         case State::Search:
-            search_to_render_transition();
+            __current_searching_object == ORAM_OBJECTS_NUM - 1 ?
+                search_to_render_transition() : search_to_search_transition();
             return;
         case State::Render:
             render_to_hblank_transition();
