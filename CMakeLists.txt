@@ -30,6 +30,10 @@ set(GBMU_LIB_SOURCES
         "include/device/GB_vram.h"
         "include/device/GB_sound.h"
         "include/device/GB_sound_channel_1.h"
+        "include/device/GB_sound_channel_2.h"
+        "include/device/GB_sound_channel_3.h"
+        "include/device/GB_sound_channel_4.h"
+        "include/device/GB_sound_length_counter.h"
 
         "sources/interrupt.cc"
         "sources/wram.cc"

@@ -12,6 +12,7 @@
 
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
+# include "GB_sound_length_counter.h"
 
 namespace GB::device {
     /**
@@ -21,14 +22,21 @@ namespace GB::device {
 class SoundChannel1 {
     public:
 
+    explicit
+    SoundChannel1()
+    : _length_counter(Registers::REG_RESERVED_NR11_BIT_MASK,
+                        Registers::REG_LENGTH_COUNTER_NR14_BIT_MASK,
+                        Registers::REG_RESTART_SOUND_NR14_BIT_MASK)
+    {};
     /**
      * @brief Sound channnel 1 register's
      */
 
     struct Registers {
 
-        constexpr static unsigned REG_RESERVED_NR11_BIT_MASK     = ::bit_mask(7, 6);
-        constexpr static unsigned REG_RESERVED_NR14_BIT_MASK     = ::bit_mask(6, 6);
+        constexpr static unsigned REG_RESERVED_NR11_BIT_MASK                  = ::bit_mask(7, 6);
+        constexpr static unsigned REG_LENGTH_COUNTER_NR14_BIT_MASK            = ::bit_mask(6, 6);
+        constexpr static unsigned REG_RESTART_SOUND_NR14_BIT_MASK             = ::bit_mask(7, 7);
 
         /**
          * @brief NR10 register (R/W)
@@ -52,9 +60,9 @@ class SoundChannel1 {
         /**
          * @brief NR12 register (R/W)
          * 
-         * @details Bit 7-4 - Initial Volume of envelope (0-0Fh) (0=No Sound)
-         *          Bit 3   - Envelope Direction (0=Decrease, 1=Increase)
-         *          Bit 2-0 - Number of envelope sweep (n: 0-7) (If zero, stop envelope operation.)
+         * @details Bit 7-4 - Initial Volume of envelope (0-0Fh) (0 = No Sound)
+         *          Bit 3   - Envelope Direction (0 = Decrease, 1 = Increase)
+         *          Bit 2-0 - Number of envelope sweep (n:§ 0-7) (If zero, stop envelope operation.)
          *          Bit 5-0 - Sound length data (Write Only) (t1: 0-63)
          */
         byte_t NR12;
@@ -62,15 +70,15 @@ class SoundChannel1 {
         /**
          * @brief NR13 register (W)
          * 
-         * @details   Lower 8 bits of 11 bit frequency (x). Next 3 bit are in NR14 ($FF14)
+         * @details Lower 8 bits of 11 bit frequency (x). Next 3 bit are in NR14 ($FF14)
          */
         byte_t NR13;
 
         /**
          * @brief NR14 register (R/W)
          * 
-         * @details Bit 7   - Initial (1=Restart Sound)     (Write Only)
-         *          Bit 6   - Counter/consecutive selection (Read/Write). (1 = Stop output when length in NR11 expires)`
+         * @details Bit 7   - Initial (1 = Restart Sound)   (Write Only)
+         *          Bit 6   - Counter/consecutive selection (Read/Write). (1 = Stop output when length in NR11 expires)
          *          Bit 2-0 - Frequency's higher 3 bits (x) (Write Only)
          */
         byte_t NR14;
@@ -79,7 +87,10 @@ class SoundChannel1 {
     protected:
     Registers _registers;
 
-    public: 
+    public:
+
+    void FrameSequancerStep(int frame_sequencer_step);
+
     /** Set NR10 register value */
     void set_NR10_reg(byte_t value);
 
@@ -109,16 +120,35 @@ class SoundChannel1 {
 
     /** Get NR14 register value */
     byte_t get_NR14_reg() const;
+
+    private:
+    LengthCounter _length_counter;
 };
+
+inline void SoundChannel1::FrameSequancerStep(int frame_sequencer_step) {
+    _length_counter.Step(frame_sequencer_step);
+}
 
 inline byte_t
 SoundChannel1::get_NR10_reg() const {
     return _registers.NR10; // TODO(godflight) Sweep unit implementation
 }
 
+inline void
+SoundChannel1::set_NR10_reg(byte_t value) {
+    _registers.NR10 = value;
+}
+
 inline byte_t
 SoundChannel1::get_NR11_reg() const {
     return _registers.NR11 | Registers::REG_RESERVED_NR11_BIT_MASK;
+}
+
+inline void
+SoundChannel1::set_NR11_reg(byte_t value) {
+    _registers.NR11 = value;
+    _length_counter.set_NRX1_reg(value);
+
 }
 
 inline byte_t
@@ -133,7 +163,13 @@ SoundChannel1::get_NR13_reg() const {
 
 inline byte_t
 SoundChannel1::get_NR14_reg() const {
-    return _registers.NR14 | Registers::REG_RESERVED_NR14_BIT_MASK;
+    return _registers.NR14 | Registers::REG_LENGTH_COUNTER_NR14_BIT_MASK;
+}
+
+inline void
+SoundChannel1::set_NR14_reg(byte_t value) {
+    _registers.NR14 = value;
+    _length_counter.set_NRX4_reg(value);
 }
 
 }

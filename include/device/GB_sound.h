@@ -18,8 +18,38 @@
 namespace GB::device {
     /**
      * @brief Implementation of sound controller from GameBoy
-     * 
+     *
      * @note NRXY - sound register's where X - number of channel(1-4), Y - number of register of the channel
+     *
+     * SOUND_CHANNEL_1: Sweep --- Wave Generation --- Length Counter --- Envelope --
+     *                                                                               \
+     *                                                                                \             Sound Output 1
+     * SOUND_CHANNEL_2:           Wave Generation --- Length Counter --- Envelope -----\           /
+     *                                                                                  \         /
+     *                                                                                   => Mixer
+     *                                                                                  /         \
+     * SOUND_CHANNEL_3:             Wave Generation --- Length Counter --- Volume -----/           \
+     *                                                                                /              Sound Output 2
+     *                                                                               /
+     * SOUND_CHANNEL_4:                      LFSR --- Length Counter --- Envelope --
+     *
+     *
+     *
+     *  Frame Sequncer
+     *  The frame sequencer generates low frequency clocks for the modulation units. It is clocked by a 512 Hz timer.
+     *
+     * Step   Length Ctr  Vol Env     Sweep
+     *  ---------------------------------------
+     *   0      Clock       -           -
+     *   1      -           -           -
+     *   2      Clock       -           Clock
+     *   3      -           -           -
+     *   4      Clock       -           -
+     *   5      -           -           -
+     *   6      Clock       -           Clock
+     *   7      -           Clock       -
+     *   ---------------------------------------
+     *   Rate   256 Hz      64 Hz       128 Hz
      */
 
 class SoundController {
