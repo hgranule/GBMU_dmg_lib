@@ -16,6 +16,8 @@
 namespace GB::device {
     /**
      * @brief Implementation of sound Length Counter from GameBoy
+     *
+     * @details Controls the duration of the audio output
      */
 
 class LengthCounter {

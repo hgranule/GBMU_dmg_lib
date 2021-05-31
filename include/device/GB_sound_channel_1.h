@@ -13,6 +13,7 @@
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
 # include "GB_sound_length_counter.h"
+# include "GB_sound_sweep_unit.h"
 
 namespace GB::device {
     /**
@@ -25,8 +26,13 @@ class SoundChannel1 {
     explicit
     SoundChannel1()
     : _length_counter(Registers::REG_RESERVED_NR11_BIT_MASK,
-                        Registers::REG_LENGTH_COUNTER_NR14_BIT_MASK,
-                        Registers::REG_RESTART_SOUND_NR14_BIT_MASK)
+                        Registers::REG_NR14_LENGTH_COUNTER_BIT_MASK,
+                        Registers::REG_NR14_RESTART_SOUND_BIT_MASK)
+    , _sweep_unit(Registers::REG_RESERVED_NR10_SWEEP_TIME_BIT_MASK,
+                        Registers::REG_RESERVED_NR10_SWEEP_MODE_BIT_MASK,
+                        Registers::REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK,
+                        Registers::REG_NR14_RESTART_SOUND_BIT_MASK,
+                        Registers::REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK)
     {};
     /**
      * @brief Sound channnel 1 register's
@@ -34,9 +40,13 @@ class SoundChannel1 {
 
     struct Registers {
 
+        constexpr static unsigned REG_RESERVED_NR10_SWEEP_TIME_BIT_MASK       = ::bit_mask(6, 4);
+        constexpr static unsigned REG_RESERVED_NR10_SWEEP_MODE_BIT_MASK       = ::bit_mask(3, 3);
+        constexpr static unsigned REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK      = ::bit_mask(2, 0);
         constexpr static unsigned REG_RESERVED_NR11_BIT_MASK                  = ::bit_mask(7, 6);
-        constexpr static unsigned REG_LENGTH_COUNTER_NR14_BIT_MASK            = ::bit_mask(6, 6);
-        constexpr static unsigned REG_RESTART_SOUND_NR14_BIT_MASK             = ::bit_mask(7, 7);
+        constexpr static unsigned REG_NR14_RESTART_SOUND_BIT_MASK             = ::bit_mask(7, 7);
+        constexpr static unsigned REG_NR14_LENGTH_COUNTER_BIT_MASK            = ::bit_mask(6, 6);
+        constexpr static unsigned REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK         = ::bit_mask(2, 0);
 
         /**
          * @brief NR10 register (R/W)
@@ -82,6 +92,16 @@ class SoundChannel1 {
          *          Bit 2-0 - Frequency's higher 3 bits (x) (Write Only)
          */
         byte_t NR14;
+
+        /**
+         * @brief The status bit, need for NR52 register
+         *
+         * @details Bit indicating the status of audio channel.
+         *          Only the mute flag can be changed.
+         *          Bits are read-only and are constantly updated.
+         */
+
+        byte_t status_bit;
     };
 
     protected:
@@ -123,10 +143,12 @@ class SoundChannel1 {
 
     private:
     LengthCounter _length_counter;
+    SweepUnit _sweep_unit;
 };
 
 inline void SoundChannel1::FrameSequancerStep(int frame_sequencer_step) {
     _length_counter.Step(frame_sequencer_step);
+    _sweep_unit.Step(frame_sequencer_step);
 }
 
 inline byte_t
@@ -163,7 +185,7 @@ SoundChannel1::get_NR13_reg() const {
 
 inline byte_t
 SoundChannel1::get_NR14_reg() const {
-    return _registers.NR14 | Registers::REG_LENGTH_COUNTER_NR14_BIT_MASK;
+    return _registers.NR14 | Registers::REG_NR14_LENGTH_COUNTER_BIT_MASK;
 }
 
 inline void

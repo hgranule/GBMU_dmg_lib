@@ -40,13 +40,13 @@ namespace GB::device {
      *
      * Step   Length Ctr  Vol Env     Sweep
      *  ---------------------------------------
-     *   0      Clock       -           -
+     *   0      Clock       -           Clock
      *   1      -           -           -
-     *   2      Clock       -           Clock
+     *   2      Clock       -           -
      *   3      -           -           -
-     *   4      Clock       -           -
+     *   4      Clock       -           Clock
      *   5      -           -           -
-     *   6      Clock       -           Clock
+     *   6      Clock       -           -
      *   7      -           Clock       -
      *   ---------------------------------------
      *   Rate   256 Hz      64 Hz       128 Hz
@@ -93,12 +93,6 @@ class SoundController {
     /**
      * @brief Sound 2 unit register's
      */
-
-    /** Set NR20 register value */
-    void set_NR20_reg(byte_t value);
-
-    /** Get NR20 register value */
-    byte_t get_NR20_reg() const;
 
     /** Set NR21 register value */
     void set_NR21_reg(byte_t value);
@@ -161,12 +155,6 @@ class SoundController {
     /**
      * @brief Sound 4 unit register's
      */
-
-    /** Set NR40 register value */
-    void set_NR40_reg(byte_t value);
-
-    /** Get NR40 register value */
-    byte_t get_NR40_reg() const;
 
     /** Set NR41 register value */
     void set_NR41_reg(byte_t value);
