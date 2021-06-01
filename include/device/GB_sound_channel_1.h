@@ -62,7 +62,7 @@ class SoundChannel1 {
         /**
          * @brief NR11 register (R/W)
          * 
-         * @details Bit 7-6 - Wave Pattern Duty (Read/Write)
+         * @details Bit 7-6 - Wave Pattern Duty (Read/Write) (Wave generator)
          *          Bit 5-0 - Sound length data (Write Only) (t1: 0-63)
          */
         byte_t NR11;
