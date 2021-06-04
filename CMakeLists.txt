@@ -36,6 +36,7 @@ set(GBMU_LIB_SOURCES
         "include/device/GB_sound_length_counter.h"
         "include/device/GB_sound_sweep_unit.h"
         "include/device/GB_sound_wave_generator.h"
+        "include/device/GB_sound_envelope_unit.h"
 
         "sources/interrupt.cc"
         "sources/wram.cc"

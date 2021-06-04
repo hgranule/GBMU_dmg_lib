@@ -14,6 +14,7 @@
 # include "common/GB_macro.h"
 # include "GB_sound_length_counter.h"
 # include "GB_sound_sweep_unit.h"
+# include "GB_sound_envelope_unit.h"
 
 namespace GB::device {
     /**
@@ -33,6 +34,10 @@ class SoundChannel1 {
                         Registers::REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK,
                         Registers::REG_NR14_RESTART_SOUND_BIT_MASK,
                         Registers::REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK)
+    , _envelope_unit(Registers::REG_NR12_ENVELOPE_INITIAL_VALUE_BITS_BIT_MASK,
+                        Registers::REG_NR12_ENVELOPE_MODE_BITS_BIT_MASK,
+                        Registers::REG_NR12_ENVELOPE_SWEEP_NUMBER_BITS_BIT_MASK,
+                        Registers::REG_NR14_RESTART_SOUND_BIT_MASK)
     {};
     /**
      * @brief Sound channnel 1 register's
@@ -40,13 +45,16 @@ class SoundChannel1 {
 
     struct Registers {
 
-        constexpr static unsigned REG_RESERVED_NR10_SWEEP_TIME_BIT_MASK       = ::bit_mask(6, 4);
-        constexpr static unsigned REG_RESERVED_NR10_SWEEP_MODE_BIT_MASK       = ::bit_mask(3, 3);
-        constexpr static unsigned REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK      = ::bit_mask(2, 0);
-        constexpr static unsigned REG_RESERVED_NR11_BIT_MASK                  = ::bit_mask(7, 6);
-        constexpr static unsigned REG_NR14_RESTART_SOUND_BIT_MASK             = ::bit_mask(7, 7);
-        constexpr static unsigned REG_NR14_LENGTH_COUNTER_BIT_MASK            = ::bit_mask(6, 6);
-        constexpr static unsigned REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK         = ::bit_mask(2, 0);
+        constexpr static unsigned REG_RESERVED_NR10_SWEEP_TIME_BIT_MASK         = ::bit_mask(6, 4);
+        constexpr static unsigned REG_RESERVED_NR10_SWEEP_MODE_BIT_MASK          = ::bit_mask(3, 3);
+        constexpr static unsigned REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK         = ::bit_mask(2, 0);
+        constexpr static unsigned REG_RESERVED_NR11_BIT_MASK                     = ::bit_mask(7, 6);
+        constexpr static unsigned REG_NR14_RESTART_SOUND_BIT_MASK                = ::bit_mask(7, 7);
+        constexpr static unsigned REG_NR14_LENGTH_COUNTER_BIT_MASK               = ::bit_mask(6, 6);
+        constexpr static unsigned REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK            = ::bit_mask(2, 0);
+        constexpr static unsigned REG_NR12_ENVELOPE_INITIAL_VALUE_BITS_BIT_MASK  = ::bit_mask(2, 0);
+        constexpr static unsigned REG_NR12_ENVELOPE_MODE_BITS_BIT_MASK           = ::bit_mask(2, 0);
+        constexpr static unsigned REG_NR12_ENVELOPE_SWEEP_NUMBER_BITS_BIT_MASK   = ::bit_mask(2, 0);
 
         /**
          * @brief NR10 register (R/W)
@@ -73,7 +81,6 @@ class SoundChannel1 {
          * @details Bit 7-4 - Initial Volume of envelope (0-0Fh) (0 = No Sound)
          *          Bit 3   - Envelope Direction (0 = Decrease, 1 = Increase)
          *          Bit 2-0 - Number of envelope sweep (n:§ 0-7) (If zero, stop envelope operation.)
-         *          Bit 5-0 - Sound length data (Write Only) (t1: 0-63)
          */
         byte_t NR12;
 
@@ -144,6 +151,7 @@ class SoundChannel1 {
     private:
     LengthCounter _length_counter;
     SweepUnit _sweep_unit;
+    EnvelopeUnit _envelope_unit;
 };
 
 inline void SoundChannel1::FrameSequancerStep(int frame_sequencer_step) {
@@ -175,7 +183,7 @@ SoundChannel1::set_NR11_reg(byte_t value) {
 
 inline byte_t
 SoundChannel1::get_NR12_reg() const {
-    return _registers.NR12; // TODO(godflight) Envelope unit implementation
+    return ; // TODO(godflight) Envelope unit implementation
 }
 
 inline byte_t
