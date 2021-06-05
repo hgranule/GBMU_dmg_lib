@@ -26,35 +26,12 @@ class SoundChannel1 {
 
     explicit
     SoundChannel1()
-    : _length_counter(Registers::REG_RESERVED_NR11_BIT_MASK,
-                        Registers::REG_NR14_LENGTH_COUNTER_BIT_MASK,
-                        Registers::REG_NR14_RESTART_SOUND_BIT_MASK)
-    , _sweep_unit(Registers::REG_RESERVED_NR10_SWEEP_TIME_BIT_MASK,
-                        Registers::REG_RESERVED_NR10_SWEEP_MODE_BIT_MASK,
-                        Registers::REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK,
-                        Registers::REG_NR14_RESTART_SOUND_BIT_MASK,
-                        Registers::REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK)
-    , _envelope_unit(Registers::REG_NR12_ENVELOPE_INITIAL_VALUE_BITS_BIT_MASK,
-                        Registers::REG_NR12_ENVELOPE_MODE_BITS_BIT_MASK,
-                        Registers::REG_NR12_ENVELOPE_SWEEP_NUMBER_BITS_BIT_MASK,
-                        Registers::REG_NR14_RESTART_SOUND_BIT_MASK)
     {};
     /**
      * @brief Sound channnel 1 register's
      */
 
     struct Registers {
-
-        constexpr static unsigned REG_RESERVED_NR10_SWEEP_TIME_BIT_MASK         = ::bit_mask(6, 4);
-        constexpr static unsigned REG_RESERVED_NR10_SWEEP_MODE_BIT_MASK          = ::bit_mask(3, 3);
-        constexpr static unsigned REG_RESERVED_NR10_SWEEP_SHIFT_BIT_MASK         = ::bit_mask(2, 0);
-        constexpr static unsigned REG_RESERVED_NR11_BIT_MASK                     = ::bit_mask(7, 6);
-        constexpr static unsigned REG_NR14_RESTART_SOUND_BIT_MASK                = ::bit_mask(7, 7);
-        constexpr static unsigned REG_NR14_LENGTH_COUNTER_BIT_MASK               = ::bit_mask(6, 6);
-        constexpr static unsigned REG_NR14_SWEEP_HIGHER_BITS_BIT_MASK            = ::bit_mask(2, 0);
-        constexpr static unsigned REG_NR12_ENVELOPE_INITIAL_VALUE_BITS_BIT_MASK  = ::bit_mask(2, 0);
-        constexpr static unsigned REG_NR12_ENVELOPE_MODE_BITS_BIT_MASK           = ::bit_mask(2, 0);
-        constexpr static unsigned REG_NR12_ENVELOPE_SWEEP_NUMBER_BITS_BIT_MASK   = ::bit_mask(2, 0);
 
         /**
          * @brief NR10 register (R/W)

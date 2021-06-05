@@ -36,15 +36,13 @@ class SweepUnit {
 public:
 
     explicit
-    SweepUnit(byte_t mask_NRX0_time, byte_t mask_NRX0_mode, byte_t mask_NRX0_shift,  byte_t mask_NRX4_restart_sound, byte_t mask_NRX4_higher_bits)
-    : _mask_NRX0_time(mask_NRX0_time)
-    , _mask_NRX0_mode(mask_NRX0_mode)
-    , _mask_NRX0_shift(mask_NRX0_shift)
-    , _mask_NRX4_restart_sound(mask_NRX4_restart_sound)
-    , _mask_NRX4_higher_bits(mask_NRX4_higher_bits)
-    {};
+    SweepUnit()
+    {
+        _sweep_counter = 0;
+        _internal_enabled_flag_reg = false;
+    }
 
-    void Step(const int frame_sequencer_step)
+    void Step(const int frame_sequencer_step);
 
     byte_t get_NRX0_reg() const;
 
@@ -114,7 +112,7 @@ SweepUnit::Step(const int frame_sequencer_step) {
 
             if (current_frequency <= FREQUENCY_PEAK && _sweep_shift) {
                 _NRX3 = ::bit_slice(8, 0, _NRX3);
-                _NRX4 = (_NRX4 & ~_mask_NRX4_higher_bits ) | ::bit_slice(2, 0, _NRX4);
+                _NRX4 = (_NRX4 & ~REG_NRX4_SWEEP_HIGHER_BITS_BIT_MASK) | ::bit_slice(2, 0, current_frequency);
                 _frequency_shadow_reg = current_frequency;
                 CalculateFrequency();
             }
@@ -133,7 +131,7 @@ SweepUnit::set_NRX0_reg(const byte_t value) {
 inline void
 SweepUnit::set_NRX4_reg(const byte_t value) {
     if (value & _mask_NRX4_restart_sound) {
-        _frequency_shadow_reg = (_NRX4 & _mask_NRX4_higher_bits) | _NRX3;
+        _frequency_shadow_reg = ((_NRX4 & _mask_NRX4_higher_bits) << 8) | _NRX3;
 
         _internal_enabled_flag_reg = _sweep_shift || _sweep_time;
 

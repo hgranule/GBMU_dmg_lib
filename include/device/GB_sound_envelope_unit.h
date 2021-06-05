@@ -12,6 +12,7 @@
 
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
+# include "common/GB_sound_masks.h"
 
 namespace GB::device {
     /**
@@ -49,11 +50,7 @@ class EnvelopeUnit {
 public:
 
     explicit
-    EnvelopeUnit(byte_t mask_NRX2_initial_volume, byte_t mask_NRX2_mode, byte_t mask_NRX2_sweep_number, byte_t mask_NRX4_restart_sound)
-    : _mask_NRX2_initial_volume(mask_NRX2_initial_volume)
-    , _mask_NRX2_mode(mask_NRX2_mode)
-    , _mask_NRX2_sweep_number(mask_NRX2_sweep_number)
-    , _mask_NRX4_restart_sound(mask_NRX4_restart_sound)
+    EnvelopeUnit()
     {
         _sweep_number = 0;
         _mode = 0;
@@ -97,15 +94,15 @@ public:
             _current_voulume += 2;
         }
 
-        if ((value ^ _NRX2) & _mask_NRX2_mode) {
+        if (GET_NRX2_ENVELOPE_MODE_BIT(value ^ _NRX2)) {
             _current_voulume = 16 - _current_voulume;
         }
 
         _current_voulume &= 0xF;
 
-        _sweep_number = value & _mask_NRX2_sweep_number;
-        _mode = value & _mask_NRX2_mode;
-        _initial_volume = value & _mask_NRX2_initial_volume;
+        _sweep_number = GET_NRX2_ENVELOPE_SWEEP_NUMBER_BITS(value);
+        _mode = GET_NRX2_ENVELOPE_MODE_BIT(value);
+        _initial_volume = GET_NRX2_INITIAL_VALUE_BITS(value);
     }
 
     void set_NRX4_reg(const byte_t value) {
@@ -114,7 +111,7 @@ public:
             _counter = 8;
         }
 
-        if (value & _mask_NRX4_restart_sound) {
+        if (GET_NRX4_RESTART_SOUND_BIT(value)) {
 
             if (_current_frame_sequencer_step == 0) {
                 _counter++;
@@ -130,13 +127,6 @@ private:
     int _sweep_number;
     int _current_voulume; // min - 0, max 0xF
     byte_t _NRX2;
-
-    byte_t _counter_mode;
-    
-    byte_t _mask_NRX2_initial_volume;
-    byte_t _mask_NRX2_mode;
-    byte_t _mask_NRX2_sweep_number;
-    byte_t _mask_NRX4_restart_sound;
 
     int _counter;
 

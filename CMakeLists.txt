@@ -20,6 +20,7 @@ set(GBMU_LIB_SOURCES
         "include/common/GB_dbuffer.h"
         "include/common/GB_macro.h"
         "include/common/GB_types.h"
+        "include/common/GB_sound_masks.h"
 
         "include/memory/GB_vaddr.h"
 

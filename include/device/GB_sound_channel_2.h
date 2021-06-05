@@ -43,7 +43,6 @@ class SoundChannel2 {
          * @details Bit 7-4 - Initial Volume of envelope (0-0Fh) (0 = No Sound)
          *          Bit 3   - Envelope Direction (0 = Decrease, 1 = Increase)
          *          Bit 2-0 - Number of envelope sweep (n:§ 0-7) (If zero, stop envelope operation.)
-         *          Bit 5-0 - Sound length data (Write Only) (t1: 0-63)
          */
         byte_t NR22;
 

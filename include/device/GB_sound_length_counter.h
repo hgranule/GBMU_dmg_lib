@@ -12,6 +12,7 @@
 
 # include "common/GB_types.h"
 # include "common/GB_macro.h"
+# include "common/GB_sound_masks.h"
 
 namespace GB::device {
     /**
@@ -24,17 +25,15 @@ class LengthCounter {
 public:
 
     explicit
-    LengthCounter(byte_t mask_NRX1, byte_t mask_NRX4, byte_t restart_sound_mask) 
-    : _mask_NRX1(mask_NRX1)
-    , _mask_NRX4(mask_NRX4)
-    , _restart_sound_mask(restart_sound_mask)
+    LengthCounter()
     {
-        Reset();
+        _counter = 0;
+        _NRX1 = 0;
+        _counter_mode = 0;
+        _current_frame_sequencer_step = 0;
     }
 
     void Step(const int frame_sequencer_step);
-
-    void Reset();
 
     byte_t get_NRX1_reg() const;
 
@@ -59,11 +58,6 @@ private:
     byte_t _counter_mode;
 
     /**
-     * @brief Mask with which only the duration value is retrieved from the register
-     */
-    byte_t _mask_NRX1;
-    byte_t _mask_NRX4;
-    /**
      * @brief Bit 7 of NRX4 register
      */
     byte_t _restart_sound_mask;
@@ -84,17 +78,10 @@ LengthCounter::Step(const int frame_sequencer_step) {
     }
 }
 
-inline void
-LengthCounter::Reset() {
-    _counter = 0;
-    _NRX1 = 0;
-    _counter_mode = 0;
-    _current_frame_sequencer_step = 0;
-}
 
 inline byte_t
 LengthCounter::get_NRX1_reg() const {
-        return _NRX1 | _mask_NRX1;
+        return _NRX1 | REG_NRX1_SOUND_LENGTH_BIT_MASK;
 }
 
 inline void
@@ -115,7 +102,7 @@ LengthCounter::set_NRX4_reg(const byte_t value) {
      *       but one more condition must be taken into account here - the channel is disconnected here only
      *       if the channel is not restarted, i.e. restart bit is zero.
      */
-    if (_counter && _counter_mode && (value & _mask_NRX4)
+    if (_counter && _counter_mode && (GET_NRX4_RESTART_SOUND_BIT(value))
         && frame_sequencer_is_counting) {
         CalculateCounter();
     }
@@ -128,25 +115,25 @@ LengthCounter::set_NRX4_reg(const byte_t value) {
      *       then we immediately count it.
      */
     if ((value & _restart_sound_mask) && !_counter) {
-        set_NRX1_reg(~_NRX1 & _mask_NRX1);
+        set_NRX1_reg(GET_NRX1_LENGTH_COUNTER_SOUND_LENGTH_BITS(~_NRX1));
 
-        if ((value & _mask_NRX4) && !frame_sequencer_is_counting) {
+        if ((GET_NRX4_RESTART_SOUND_BIT(_NRX4)) && !frame_sequencer_is_counting) {
             CalculateCounter();
         }
     }
 
     _NRX4 = value;
-    _counter_mode = value & _mask_NRX4;
+    _counter_mode = GET_NRX4_RESTART_SOUND_BIT(value)
 }
 
 inline byte_t
 LengthCounter::get_NRX4_reg() const {
-    return _NRX4 | _mask_NRX4;
+    return _NRX4 | REG_NRX4_RESTART_SOUND_BIT_MASK;
 }
 
 inline void
 LengthCounter::ResetCounter() {
-    _counter =  (~_NRX1 & _mask_NRX1) + 1;
+    _counter =  (~_NRX1 & REG_NRX1_SOUND_LENGTH_BIT_MASK) + 1;
 }
 
 inline void
@@ -157,7 +144,7 @@ LengthCounter::CalculateCounter() {
         _counter = 0;
     }
     // (64 - t1) * (1/256)
-    _NRX1 = (_NRX1 & (~_mask_NRX1)) | (~(_counter - 1) & _mask_NRX1);
+    _NRX1 = (_NRX1 & (~REG_NRX1_SOUND_LENGTH_BIT_MASK)) | (~(_counter - 1) & REG_NRX1_SOUND_LENGTH_BIT_MASK);
 }
 
 
