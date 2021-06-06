@@ -34,17 +34,17 @@
  *      OBJECT_SEARCH_TIME = ORAM_SEARCH_TIME / ORAM_OBJECTS_NUM = 2, SCANLINE_TIME = 456, ENDLINE_TIME = 4,
  *      __render_time = calculated depending on founded objects and SCX register
  *
- *      FirstSearch -> Search                   {                                                        }
- *      Search (1 <= cur obj <= 38) -> Search   { [Step = OBJECT_SEARCH_TIME] ++current_searching_object }
- *      Search (cur obj = 39) -> Render         {                                                        }
- *      Render -> Hblank                        [Step = __render_time]
+ *      FirstOamSearch(CurObj = 0) -> SearchOam	{                                                        }
+ *      SearchOam (cur obj <= 38) -> SearchOam	{ [Step = OBJECT_SEARCH_TIME] ++current_searching_object }
+ *      SearchOam (cur obj = 39) -> Render      {                                                        }
+ *      Render -> Hblank                      	[Step = __render_time]
  *      Hblank -> EndLine                       [Step = SCANLINE_TIME - ORAM_SEARCH_TIME - __render_time - ENDLINE_TIME]
- *      EndLine (0 <= LY <= 143) -> Search      {                              }
+ *      EndLine (0 <= LY <= 143) -> SearchOam   {                              }
  *      EndLine (144 <= LY <= 152) -> Vblank    { [Step = ENDLINE_TIME] (++LY) }
  *      EndLine (LY = 153) -> LastVblank        {                              }
  *      Vblank -> EndLine                       [Step = SCANLINE_TIME - ENDLINE_TIME]
  *      LastVblank -> LastEndLine               [Step = SCANLINE_TIME - ENDLINE_TIME] (++LY)
- *      LastEndLine -> FirstSearch              [Step = ENDLINE_TIME]
+ *      LastEndLine -> FirstOamSearch           [Step = ENDLINE_TIME]
  */
 namespace GB::device {
 
@@ -70,6 +70,13 @@ class PPU {
         Reg8 BCPD;
         Reg8 OCPS;
         Reg8 OCPD;
+
+        explicit
+        Registers(
+                Reg8 lcdc_init_value = LCDC_INIT_VALUE,
+                Reg8 stat_init_value = STAT_INIT_VALUE)
+        : LCDC(lcdc_init_value), STAT(stat_init_value)
+        {}
     };
 
     enum STAT_Mode {
@@ -80,8 +87,8 @@ class PPU {
     };
 
     enum State {
-        FirstSearch = 0,
-        Search = 1,
+        FirstOamSearch = 0,
+        SearchOam = 1,
         Render = 3,
         HBlank = 4,
         VBlank = 5,
@@ -99,7 +106,7 @@ class PPU {
 
     constexpr static clk_cycle_t ORAM_SEARCH_TIME = 80_CLKCycles;
     // TODO(dolovnyak) need to find accurate object search timings.
-    constexpr static clk_cycle_t OBJECT_SEARCH_TIME = ORAM_SEARCH_TIME / ORAM_OBJECTS_NUM;
+    constexpr static clk_cycle_t OBJECT_SEARCH_TIME = 2_CLKCycles;
     constexpr static clk_cycle_t SCANLINE_TIME = 456_CLKCycles;
     constexpr static clk_cycle_t ENDLINE_TIME = 4_CLKCycles;  // TODO(dolovnyak) need to check timings on test roms
 
@@ -107,7 +114,7 @@ class PPU {
     constexpr static unsigned MAX_INTERSECTED_OBJECTS = 10;
     constexpr static unsigned LARGE_OBJECT_HEIGHT = 16;
     constexpr static unsigned NORMAL_OBJECT_HEIGHT = 8;
-    constexpr static unsigned OBJECT_Y_INDENT = 16;
+    constexpr static unsigned OBJ_Y_INDENT = 16;
 
     PPU() = delete;
     PPU(ORAM *oram, VRAM *vram);
@@ -154,11 +161,11 @@ class PPU {
     clk_cycle_t             __render_time;
     ::devsync::counter_t    __counter;
     std::vector<Object>     __intersected_objects;
-    u8                      __current_searching_object;
+    u8                      __next_object_index;
 
-    void add_intersected_object_if_possible();
+    void add_oram_object();
 
-    void first_search_to_search_transition();
+    void first_search_transition();
     void search_to_search_transition();
     void search_to_render_transition();
     void render_to_hblank_transition();
@@ -182,7 +189,7 @@ inline byte_t PPU::get_STAT_reg() const {
 }
 
 inline void PPU::set_STAT_reg(byte_t value) {
-    __regs.STAT |= ::bit_slice(7, 2, value);
+    __regs.STAT = (value & ::bit_mask(7, 2)) | ::bit_slice(1, 0, __regs.STAT);
 }
 
 inline byte_t PPU::get_LY_reg() const {

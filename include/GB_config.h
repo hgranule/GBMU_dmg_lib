@@ -29,6 +29,9 @@ constexpr unsigned VRAM_NON_CGB_SIZE = VRAM_BANK_SIZE;
 constexpr unsigned VRAM_CGB_SIZE = VRAM_BANK_SIZE * 2;
 constexpr unsigned VRAM_MAX_SIZE = VRAM_CGB_SIZE;
 
+constexpr unsigned LCDC_INIT_VALUE = 0x0;
+constexpr unsigned STAT_INIT_VALUE = 0x0;
+
 
 enum GBModeFlag : u16 {
     DMG_MODE = 0b000001,

@@ -26,7 +26,7 @@ namespace devsync {
  */
 inline bool
 is_ready(const clk_cycle_t clock) {
-    return clock >= 0;
+    return clock <= 0;   // TODO i changed it so the counter starts working
 }
 
 /**
@@ -42,7 +42,9 @@ pay(clk_cycle_t& clock, clk_cycle_t ccls) {
  */
 inline void
 step(clk_cycle_t& clock, clk_cycle_t ccls) {
-    clock = std::min(clock + ccls, clk_cycle_t(0));
+    clock = std::max(clock + ccls, clk_cycle_t(0));  // TODO(hgranule) you told we use positive cycles when call step,
+                                                     //                but in this case clock will always 0
+                                                     //                also pay function takes away clocks so it's error
 }
 
 /**
