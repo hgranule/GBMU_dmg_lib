@@ -88,8 +88,9 @@ endmacro()
 ################################################################################
 # GameBoy library unit tests                                                   #
 ################################################################################
-ADD_GBMU_LIB_TEST(interrupt_ctrl_test   "test/interrupt.cc")
-ADD_GBMU_LIB_TEST(wram_test             "test/wram.cc")
-ADD_GBMU_LIB_TEST(joypad_test           "test/joypad.cc")
-ADD_GBMU_LIB_TEST(oram_test             "test/oram.cc")
-ADD_GBMU_LIB_TEST(vram_test             "test/vram.cc")
+ADD_GBMU_LIB_TEST(interrupt_ctrl_test           "test/interrupt.cc")
+ADD_GBMU_LIB_TEST(wram_test                     "test/wram.cc")
+ADD_GBMU_LIB_TEST(joypad_test                   "test/joypad.cc")
+ADD_GBMU_LIB_TEST(oram_test                     "test/oram.cc")
+ADD_GBMU_LIB_TEST(vram_test                     "test/vram.cc")
+ADD_GBMU_LIB_TEST(sound_lenght_counter_test     "test/sound_length_counter.cc")

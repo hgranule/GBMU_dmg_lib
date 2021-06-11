@@ -25,7 +25,7 @@ class LengthCounter {
 public:
 
     explicit
-    LengthCounter()
+    LengthCounter(bool& sound_status) : _sound_status(sound_status)
     {
         _counter = 0;
         _NRX1 = 0;
@@ -60,9 +60,9 @@ private:
     /**
      * @brief Bit 7 of NRX4 register
      */
-    byte_t _restart_sound_mask;
     int _counter;
     int _current_frame_sequencer_step;
+    bool& _sound_status;
 };
 
 inline void
@@ -81,7 +81,7 @@ LengthCounter::Step(const int frame_sequencer_step) {
 
 inline byte_t
 LengthCounter::get_NRX1_reg() const {
-        return _NRX1 | REG_NRX1_SOUND_LENGTH_BIT_MASK;
+    return _NRX1 | REG_NRX1_SOUND_LENGTH_BIT_MASK;
 }
 
 inline void
@@ -103,7 +103,7 @@ LengthCounter::set_NRX4_reg(const byte_t value) {
      *       if the channel is not restarted, i.e. restart bit is zero.
      */
     if (_counter && _counter_mode && (GET_NRX4_RESTART_SOUND_BIT(value))
-        && frame_sequencer_is_counting) {
+        && !frame_sequencer_is_counting) {
         CalculateCounter();
     }
 
@@ -114,7 +114,7 @@ LengthCounter::set_NRX4_reg(const byte_t value) {
      *       the component is turned on and the current state of the Frame Sequencer is counting the component,
      *       then we immediately count it.
      */
-    if ((value & _restart_sound_mask) && !_counter) {
+    if (GET_NRX4_RESTART_SOUND_BIT(value) && !_counter) {
         set_NRX1_reg(GET_NRX1_LENGTH_COUNTER_SOUND_LENGTH_BITS(~_NRX1));
 
         if ((GET_NRX4_RESTART_SOUND_BIT(_NRX4)) && !frame_sequencer_is_counting) {
@@ -123,7 +123,7 @@ LengthCounter::set_NRX4_reg(const byte_t value) {
     }
 
     _NRX4 = value;
-    _counter_mode = GET_NRX4_RESTART_SOUND_BIT(value)
+    _counter_mode = GET_NRX4_RESTART_SOUND_BIT(value);
 }
 
 inline byte_t
@@ -140,13 +140,14 @@ inline void
 LengthCounter::CalculateCounter() {
     _counter--;
 
-    if (_counter_mode <= 0) {
+    if (_counter <= 0) {
         _counter = 0;
+
+        _sound_status = false;
     }
     // (64 - t1) * (1/256)
     _NRX1 = (_NRX1 & (~REG_NRX1_SOUND_LENGTH_BIT_MASK)) | (~(_counter - 1) & REG_NRX1_SOUND_LENGTH_BIT_MASK);
 }
-
 
 }
 
