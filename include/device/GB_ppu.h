@@ -164,16 +164,6 @@ class PPU {
     u8                      __next_object_index;
 
     void add_oram_object();
-
-    void first_search_transition();
-    void search_to_search_transition();
-    void search_to_render_transition();
-    void render_to_hblank_transition();
-    void hblank_to_endline_transition();
-    void vblank_to_endline_transition();
-    void last_vblank_to_last_endline_transition();
-    void endline_transition();
-    void last_endline_to_search_transition();
 };
 
 inline byte_t PPU::get_LCDC_reg() const {

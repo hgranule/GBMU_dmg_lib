@@ -32,13 +32,15 @@ constexpr unsigned VRAM_MAX_SIZE = VRAM_CGB_SIZE;
 constexpr unsigned LCDC_INIT_VALUE = 0x0;
 constexpr unsigned STAT_INIT_VALUE = 0x0;
 
-
 enum GBModeFlag : u16 {
     DMG_MODE = 0b000001,
     MGB_MODE = 0b000010,
     CGB_DMG_MODE = 0b000100,
     CGB_MODE = 0b001000
 };
+
+// TODO(dolovnyak, hgranule) I created it to be able to test.
+GBModeFlag          TEMPORARY_GB_MODE_FLAG;
 
 }  // namespace GB
 

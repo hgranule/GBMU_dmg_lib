@@ -51,12 +51,23 @@ TEST(PPU, STAT_Register) {
     EXPECT_EQ(ppu.get_STAT_reg(), 0x3);
 }
 
+/*
+ * NOTE:    In GameBoy coordinates of objects are specified for the lower right corner 8x16 object.
+ *
+ *          Top left corner calculated using: newPosX = posX - 8, newPosY = posY - 16.
+ *
+ *          Y=0 hides 8x8 and 8x16 both objects.
+ *          Y=2 hides an 8x8 object, but display last two rows of an 8x16 object.
+ *          Y=16 displays both 8x8 8x16 objects at the top of the screen.
+ *          Y=144 displays 8x16 object aligned with the bottom of the screen and 8x8 on line 136.
+ */
 TEST(PPU, add_oram_object) {
     ORAM oram;
     VRAM vram;
 
-//    PPU::Object objects[40];
-    // TODO (dolovnyak)
+    PPU::Object objects[40];
+
+    objects[0].pos_y = 0;
 
     PPU ppu(&oram, &vram);
 }
@@ -68,7 +79,7 @@ TEST(PPU, oam_search_pipeline) {
     PPU ppu(&oram, &vram);
     EXPECT_EQ(ppu.__current_state, PPU::State::FirstOamSearch);
 
-    // first_search_transition
+    // first oram search -> oram search
     int current_object_index = 0;
     ppu.step();
     EXPECT_EQ(ppu.__counter.__counter, PPU::OBJECT_SEARCH_TIME - 1_CLKCycles);
@@ -82,7 +93,7 @@ TEST(PPU, oam_search_pipeline) {
     EXPECT_EQ(ppu.__current_state, PPU::State::SearchOam);
     EXPECT_EQ(ppu.get_STAT_reg(), PPU::STAT_SearchingOAM);
 
-    // search_to_search_transition
+    // oram search -> oram search
     while (ppu.__next_object_index < 39) {
         ++current_object_index;
         ppu.step();
@@ -97,7 +108,7 @@ TEST(PPU, oam_search_pipeline) {
         EXPECT_EQ(ppu.get_STAT_reg(), PPU::STAT_SearchingOAM);
     }
 
-    // search_to_render_transition
+    // last oram search -> render
     ppu.step();
     EXPECT_EQ(ppu.__counter.__counter, PPU::OBJECT_SEARCH_TIME - 1_CLKCycles);
     EXPECT_EQ(ppu.__next_object_index, 40);
