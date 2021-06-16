@@ -20,6 +20,7 @@ set(GBMU_LIB_SOURCES
         "include/common/GB_dbuffer.h"
         "include/common/GB_macro.h"
         "include/common/GB_types.h"
+        "include/common/GB_utilities.h"
 
         "include/memory/GB_vaddr.h"
 
@@ -86,3 +87,4 @@ ADD_GBMU_LIB_TEST(joypad_test           "test/joypad.cc")
 ADD_GBMU_LIB_TEST(oram_test             "test/oram.cc")
 ADD_GBMU_LIB_TEST(vram_test             "test/vram.cc")
 ADD_GBMU_LIB_TEST(ppu_test              "test/ppu.cc")
+ADD_GBMU_LIB_TEST(uilities_test         "test/utilities.cc")

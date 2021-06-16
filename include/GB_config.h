@@ -19,7 +19,7 @@ constexpr unsigned VBK_INIT_VALUE = 0x0;
 
 constexpr unsigned INTC_IF_INIT_VALUE = 0x0;
 constexpr unsigned INTC_IE_INIT_VALUE = 0x0;
-constexpr bool INTC_IME_INIT_VALUE = true;
+constexpr bool     INTC_IME_INIT_VALUE = true;
 
 constexpr unsigned ORAM_OBJECTS_NUM = 40;
 constexpr unsigned ORAM_SIZE = ORAM_OBJECTS_NUM * 4_Bytes;
@@ -34,13 +34,9 @@ constexpr unsigned STAT_INIT_VALUE = 0x0;
 
 enum GBModeFlag : u16 {
     DMG_MODE = 0b000001,
-    MGB_MODE = 0b000010,
     CGB_DMG_MODE = 0b000100,
     CGB_MODE = 0b001000
 };
-
-// TODO(dolovnyak, hgranule) I created it to be able to test.
-GBModeFlag          TEMPORARY_GB_MODE_FLAG;
 
 }  // namespace GB
 
