@@ -10,7 +10,13 @@ using ORAM = GB::device::ORAM;
 
 TEST(ObjectsRAM, Constructors) {
     ORAM oram;
+
     EXPECT_EQ(oram.get_memory_buffer_ref().size(), 160);
+
+    /// All clean by default
+    for (int i = 0; i < 160; ++i) {
+        EXPECT_EQ(oram.get_memory_buffer_ref()[i], 0);
+    }
 
     oram.write_phys_addr(0, 100);
     oram.write_phys_addr(10, 101);

@@ -24,7 +24,9 @@ class dbuffer_t {
 
     inline static
     uint8_t* __allocate(size_t n) {
-        return new uint8_t[n];
+        return new uint8_t[n]();
+        // TODO(hgranule) I changed it because before there was trash in all buffers and __memory after initialize. And
+        //                you don't check it in tests.
     }
 
     inline static void

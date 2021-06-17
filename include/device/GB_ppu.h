@@ -35,10 +35,10 @@ class PPU {
     };
 
     struct Object {
-        u8 pos_x;
-        u8 pos_y;
-        u8 sprite_index;
-        u8 attributes;
+        byte_t pos_x;
+        byte_t pos_y;
+        byte_t sprite_index;
+        byte_t attributes;
     };
 
     constexpr static clk_cycle_t ORAM_SEARCH_TIME = 80_CLKCycles;
@@ -52,6 +52,8 @@ class PPU {
     constexpr static unsigned OBJ_Y_INDENT = 16;
     constexpr static unsigned NORMAL_OBJECT_HEIGHT = 8;
     constexpr static unsigned LARGE_OBJECT_HEIGHT = 16;
+
+    constexpr static u8 STAT_MASK = 0b10000000;
 
     PPU() = delete;
     PPU(ORAM *oram, VRAM *vram);
@@ -79,14 +81,14 @@ class PPU {
     ORAM*                   __oram;
     VRAM*                   __vram;
 
+    State                   __current_state;
+
     clk_cycle_t             __render_time;
 
     ::devsync::counter_t    __counter;
 
     std::vector<Object>     __intersected_objects;
     u8                      __next_object_index;
-
-    State                   __current_state;
 
     // LCDC
     bool                    __bg_window_enable;
@@ -107,55 +109,54 @@ class PPU {
     STAT_Mode               __stat_mode;
 
     // LY LYC
-    u8                      __current_line;
-    u8                      __line_to_compare;
+    byte_t                  __current_line;  // TODO(dolovnayk) when screen of - it fixed at 0x0.
+    byte_t                  __line_to_compare;
 
     void add_oram_object(int current_object_index);
 };
 
 inline byte_t PPU::get_LCDC_reg() const {
-    return __bg_window_enable << 0 |
-           __obj_enable << 1 |
-           __obj_high << 2 |
-           __bg_tile_map_memory_shifted << 3 |
-           __bg_window_tiles_memory_shifted << 4 |
-           __window_enable << 5 |
-           __window_tile_map_memory_shifted << 6 |
-           __lcd_enable << 7;
+    return  __bg_window_enable << 0
+            | __obj_enable << 1
+            | __obj_high << 2
+            | __bg_tile_map_memory_shifted << 3
+            | __bg_window_tiles_memory_shifted << 4
+            | __window_enable << 5
+            | __window_tile_map_memory_shifted << 6
+            | __lcd_enable << 7;
 }
 
 inline void PPU::set_LCDC_reg(byte_t value) {
-    __bg_window_enable = ::bit_n(0, value);
-    __obj_enable = ::bit_n(1, value);
-    __obj_high = ::bit_n(2, value);
-    __bg_tile_map_memory_shifted = ::bit_n(3, value);
-    __bg_window_tiles_memory_shifted = ::bit_n(4, value);
-    __window_enable = ::bit_n(5, value);
-    __window_tile_map_memory_shifted = ::bit_n(6, value);
-    __lcd_enable = ::bit_n(7, value);
+    __bg_window_enable                  = ::bit_n(0, value);
+    __obj_enable                        = ::bit_n(1, value);
+    __obj_high                          = ::bit_n(2, value);
+    __bg_tile_map_memory_shifted        = ::bit_n(3, value);
+    __bg_window_tiles_memory_shifted    = ::bit_n(4, value);
+    __window_enable                     = ::bit_n(5, value);
+    __window_tile_map_memory_shifted    = ::bit_n(6, value);
+    __lcd_enable                        = ::bit_n(7, value);
 }
 
 /**
- *
  * @details:    Bit 7 unused and always set in 1 by source
  *              https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.5)
  */
 inline byte_t PPU::get_STAT_reg() const {
-    return __stat_mode |
-           __ly_equal_to_lyc << 2 |
-           __hblank_interrupt_enable << 3 |
-           __vblank_interrupt_enable << 4 |
-           __oram_interrupt_enable << 5 |
-           __ly_interrupt_enable << 6 |
-           1 << 7;
+    return  __stat_mode
+            | __ly_equal_to_lyc << 2
+            | __hblank_interrupt_enable << 3
+            | __vblank_interrupt_enable << 4
+            | __oram_interrupt_enable << 5
+            | __ly_interrupt_enable << 6
+            | STAT_MASK;
 }
 
 inline void PPU::set_STAT_reg(byte_t value) {
-    __ly_equal_to_lyc = ::bit_n(2, value);
-    __hblank_interrupt_enable = ::bit_n(3, value);
-    __vblank_interrupt_enable = ::bit_n(4, value);
-    __oram_interrupt_enable = ::bit_n(5, value);
-    __ly_interrupt_enable = ::bit_n(6, value);
+    __ly_equal_to_lyc           = ::bit_n(2, value);
+    __hblank_interrupt_enable   = ::bit_n(3, value);
+    __vblank_interrupt_enable   = ::bit_n(4, value);
+    __oram_interrupt_enable     = ::bit_n(5, value);
+    __ly_interrupt_enable       = ::bit_n(6, value);
 }
 
 inline byte_t PPU::get_LY_reg() const {

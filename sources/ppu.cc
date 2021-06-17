@@ -4,23 +4,32 @@
 namespace GB::device {
 
 PPU::PPU(ORAM *oram, VRAM *vram)
-: __oram(oram), __vram(vram), __current_state(State::FirstOamSearch) {
+: __oram(oram), __vram(vram),
+__current_state(State::FirstOamSearch), __render_time(0), __counter(0), __next_object_index(0) {
 
-    __bg_window_enable = ::bit_n(0, LCDC_INIT_VALUE);
-    __obj_enable = ::bit_n(1, LCDC_INIT_VALUE);
-    __obj_high = ::bit_n(2, LCDC_INIT_VALUE);
-    __bg_tile_map_memory_shifted = ::bit_n(3, LCDC_INIT_VALUE);
-    __bg_window_tiles_memory_shifted = ::bit_n(4, LCDC_INIT_VALUE);
-    __window_enable = ::bit_n(5, LCDC_INIT_VALUE);
-    __window_tile_map_memory_shifted = ::bit_n(6, LCDC_INIT_VALUE);
-    __lcd_enable = ::bit_n(7, LCDC_INIT_VALUE);
+    __intersected_objects.reserve(10);
 
-    __stat_mode = static_cast<STAT_Mode>(::bit_slice(1, 0, STAT_INIT_VALUE));
-    __ly_equal_to_lyc = ::bit_n(2, STAT_INIT_VALUE);
-    __hblank_interrupt_enable = ::bit_n(3, STAT_INIT_VALUE);
-    __vblank_interrupt_enable = ::bit_n(4, STAT_INIT_VALUE);
-    __oram_interrupt_enable = ::bit_n(5, STAT_INIT_VALUE);
-    __ly_interrupt_enable = ::bit_n(6, STAT_INIT_VALUE);
+    // LCDC
+    __bg_window_enable                  = ::bit_n(0, LCDC_INIT_VALUE);
+    __obj_enable                        = ::bit_n(1, LCDC_INIT_VALUE);
+    __obj_high                          = ::bit_n(2, LCDC_INIT_VALUE);
+    __bg_tile_map_memory_shifted        = ::bit_n(3, LCDC_INIT_VALUE);
+    __bg_window_tiles_memory_shifted    = ::bit_n(4, LCDC_INIT_VALUE);
+    __window_enable                     = ::bit_n(5, LCDC_INIT_VALUE);
+    __window_tile_map_memory_shifted    = ::bit_n(6, LCDC_INIT_VALUE);
+    __lcd_enable                        = ::bit_n(7, LCDC_INIT_VALUE);
+
+    // STAT
+    __stat_mode                 = static_cast<STAT_Mode>(::bit_slice(1, 0, STAT_INIT_VALUE));
+    __ly_equal_to_lyc           = ::bit_n(2, STAT_INIT_VALUE);
+    __hblank_interrupt_enable   = ::bit_n(3, STAT_INIT_VALUE);
+    __vblank_interrupt_enable   = ::bit_n(4, STAT_INIT_VALUE);
+    __oram_interrupt_enable     = ::bit_n(5, STAT_INIT_VALUE);
+    __ly_interrupt_enable       = ::bit_n(6, STAT_INIT_VALUE);
+
+    // LY LYX
+    __current_line      = LY_INIT_VALUE;
+    __line_to_compare   = LYC_INIT_VALUE;
 }
 
 // TODO(dolovnyak)  there is strange clock behavior depending on SCX register
@@ -41,6 +50,9 @@ PPU::PPU(ORAM *oram, VRAM *vram)
  *              Y=144 displays 8x16 object aligned with the bottom of the screen and 8x8 on line 136.
  *
  *              https://gbdev.io/pandocs/OAM.html
+ *
+ *              When CGB mode intersected objects sorted only by oram index
+ *              In CGB_DMG_MODE/DMG_MODE (need to check about DMG_MODE) it sorted by x coordinate, then by oram index.
  */
 void PPU::add_oram_object(int current_object_index) {
     // TODO(dolovnyak)  if (__dma.running)
@@ -50,16 +62,16 @@ void PPU::add_oram_object(int current_object_index) {
 
     u8 object_height = __obj_high ? LARGE_OBJECT_HEIGHT : NORMAL_OBJECT_HEIGHT;
 
-    // TODO(dolovnyak, hgranule) not perfect way to get object
-    const PPU::Object& current_object = reinterpret_cast<PPU::Object*>
+    // TODO(dolovnyak, hgranule) ugly way to get object
+    const PPU::Object& current_object = reinterpret_cast<const PPU::Object *>
             (__oram->get_memory_buffer_ref().get_data_addr())[current_object_index];
 
-    if (current_object.pos_y - OBJ_Y_INDENT <= __current_line &&
-        current_object.pos_y - OBJ_Y_INDENT + object_height > __current_line) {
+    if (current_object.pos_y <= __current_line + OBJ_Y_INDENT
+        && current_object.pos_y + object_height > __current_line + OBJ_Y_INDENT) {
         if (TEMPORARY_GB_MODE_FLAG == CGB_MODE) {
             __intersected_objects.push_back(current_object);
         }
-        // TODO(dolovnyak) CGB_DMG_MODE - exactly correct, but need to check about DMG_MODE.
+        // TODO(dolovnyak) CGB_DMG_MODE - exactly correct (from PanDocs), but need to check about DMG_MODE.
         else if (TEMPORARY_GB_MODE_FLAG == DMG_MODE || TEMPORARY_GB_MODE_FLAG == CGB_DMG_MODE) {
             auto comparator = [](const Object& new_obj, const Object& cur_obj){ return new_obj.pos_x < cur_obj.pos_x; };
             insert_sorting(__intersected_objects, current_object, comparator);
@@ -155,6 +167,9 @@ void PPU::step() {
             break;
 
 
+        /**
+         * NOTE:    LY (current_line) sets to 0 on line 153 during last vblank first few ticks.
+         */
         case State::LastVblank:
             __stat_mode = STAT_Mode::STAT_Vblank;
             __current_line = 0;
@@ -166,7 +181,7 @@ void PPU::step() {
 
         // TODO(dolovnyak)  EndLine state was taken from https://habr.com/ru/post/155323/ but this source is not
         //                  reliable. In this source:
-        //                  https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf(8.8)
+        //                  https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.8)
         //                  there are strange, but accurate timings with different behavior on CGB/DMG,
         //                  in the future, need to check on tests roms.
         //
@@ -177,17 +192,17 @@ void PPU::step() {
             ++__current_line;
 
             if (__current_line <= 143) {
-                __current_state = State::SearchOam;
+                __current_state = State::FirstOamSearch;
             }
             else {
-                __current_state = __current_line == 153 ? State::LastVblank : State::VBlank;
+                __current_state = __current_line == 152 ? State::LastVblank : State::VBlank;
             }
             __counter.step(ENDLINE_TIME);
             break;
 
 
         case State::LastEndLine:
-            __current_state = State::SearchOam;
+            __current_state = State::FirstOamSearch;
             __counter.step(ENDLINE_TIME);
             break;
 

@@ -31,6 +31,8 @@ constexpr unsigned VRAM_MAX_SIZE = VRAM_CGB_SIZE;
 
 constexpr unsigned LCDC_INIT_VALUE = 0x0;
 constexpr unsigned STAT_INIT_VALUE = 0x0;
+constexpr unsigned LY_INIT_VALUE = 0x0;
+constexpr unsigned LYC_INIT_VALUE = 0x0;
 
 enum GBModeFlag : u16 {
     DMG_MODE = 0b000001,
