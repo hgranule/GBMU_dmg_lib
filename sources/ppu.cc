@@ -79,15 +79,6 @@ void PPU::add_oram_object(int current_object_index) {
     }
 }
 
-/* TODO
- *          Implement FETCHING_STATE_MACHINE (or just added states to current machine).
- *          Fetching sate machine states are something like:
- *          FETCHER_GET_TILE, 8 clocks
- *          FETCHER_GET_TILE_DATA_LOWER, 8 clocks
- *          FETCHER_GET_TILE_DATA_HIGH, 8 clocks
- *          FETCHER_PUSH, 8 clocks
- *          ................
- */
 /**
  * Current state machine:
  *      OBJECT_SEARCH_TIME = ORAM_SEARCH_TIME / ORAM_OBJECTS_NUM = 2, SCANLINE_TIME = 456, ENDLINE_TIME = 4,
@@ -140,6 +131,15 @@ void PPU::step() {
             break;
 
 
+        /* TODO
+         *          Implement FETCHING_STATE_MACHINE with pixelFIFO.
+         *          Fetching sate machine states are something like:
+         *          FETCHER_GET_TILE, 2 clocks
+         *          FETCHER_GET_TILE_DATA_LOWER, 2 clocks
+         *          FETCHER_GET_TILE_DATA_HIGH, 2 clocks
+         *          FETCHER_PUSH, 2 clocks
+         *          ................
+         */
         case State::Render:
             __stat_mode = STAT_Mode::STAT_Render;
 
