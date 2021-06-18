@@ -173,7 +173,8 @@ void PPU::step() {
         case State::VBlank:
             __stat_mode = STAT_Mode::STAT_Vblank;
 
-            // TODO(dolovnyak, hgranule) request VBL interrupt
+            if (__current_line == 143)
+                ; // TODO(dolovnyak, hgranule) request VBL interrupt
 
             if (!__stat_interrupt_requested && __vblank_interrupt_enable) {
                 // TODO(dolovnyak, hgranule) request stat vblank interrupt
