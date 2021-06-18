@@ -12,7 +12,7 @@ using ORAM = GB::device::ORAM;
 using VRAM = GB::device::VRAM;
 
 TEST(PPU, Constructors) {
-    // TODO
+    // TODO(dolovnyak)
 }
 
 TEST(PPU, LCDC_Register_get_set) {

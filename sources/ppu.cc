@@ -5,7 +5,11 @@ namespace GB::device {
 
 PPU::PPU(ORAM *oram, VRAM *vram)
 : __oram(oram), __vram(vram),
-__current_state(State::FirstOamSearch), __render_time(0), __counter(0), __next_object_index(0) {
+__current_state(State::FirstOamSearch),
+__render_time(0),
+__counter(0),
+__next_object_index(0),
+__stat_interrupt_requested(false) {
 
     __intersected_objects.reserve(10);
 
@@ -21,7 +25,7 @@ __current_state(State::FirstOamSearch), __render_time(0), __counter(0), __next_o
 
     // STAT
     __stat_mode                 = static_cast<STAT_Mode>(::bit_slice(1, 0, STAT_INIT_VALUE));
-    __ly_equal_to_lyc           = ::bit_n(2, STAT_INIT_VALUE);
+    __ly_equal_to_lyc_flag      = ::bit_n(2, STAT_INIT_VALUE);
     __hblank_interrupt_enable   = ::bit_n(3, STAT_INIT_VALUE);
     __vblank_interrupt_enable   = ::bit_n(4, STAT_INIT_VALUE);
     __oram_interrupt_enable     = ::bit_n(5, STAT_INIT_VALUE);
@@ -108,8 +112,10 @@ void PPU::step() {
         case State::FirstOamSearch:
             __stat_mode = STAT_Mode::STAT_SearchingOAM;
 
-            //TODO(dolovnyak, hgranule) throw OAM_SEARCHING interrupt if it's possible.
-            //TODO(dolovnyak, hgranule) throw LY=LYC interrupt if it's needed and possible.
+           if (!__stat_interrupt_requested && __oram_interrupt_enable) {
+               // TODO(dolovnyak, hgranule) request oram interrupt
+               __stat_interrupt_requested = true;
+           }
 
             __next_object_index = 1;
             __intersected_objects.clear();
@@ -154,6 +160,11 @@ void PPU::step() {
         case State::HBlank:
             __stat_mode = STAT_Mode::STAT_Hblank;
 
+            if (!__stat_interrupt_requested && __hblank_interrupt_enable) {
+                // TODO(dolovnyak, hgranule) request hblank interrupt
+                __stat_interrupt_requested = true;
+            }
+
             __current_state = State::EndLine;
             __counter.step(SCANLINE_TIME - ORAM_SEARCH_TIME - __render_time - ENDLINE_TIME);
             break;
@@ -161,6 +172,13 @@ void PPU::step() {
 
         case State::VBlank:
             __stat_mode = STAT_Mode::STAT_Vblank;
+
+            // TODO(dolovnyak, hgranule) request VBL interrupt
+
+            if (!__stat_interrupt_requested && __vblank_interrupt_enable) {
+                // TODO(dolovnyak, hgranule) request stat vblank interrupt
+                __stat_interrupt_requested = true;
+            }
 
             __current_state = State::EndLine;
             __counter.step(SCANLINE_TIME - ENDLINE_TIME);
@@ -174,40 +192,58 @@ void PPU::step() {
             __stat_mode = STAT_Mode::STAT_Vblank;
             __current_line = 0;
 
+            ly_equal_lyc_interrupt_handle();
             __current_state = State::LastEndLine;
             __counter.step(SCANLINE_TIME - ENDLINE_TIME);
             break;
 
 
-        // TODO(dolovnyak)  EndLine state was taken from https://habr.com/ru/post/155323/ but this source is not
-        //                  reliable. In this source:
+        // TODO(dolovnyak)  In this source:
         //                  https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.8)
-        //                  there are strange, but accurate timings with different behavior on CGB/DMG,
-        //                  in the future, need to check on tests roms.
-        //
-        // TODO(dolovnyak)  In the future need to check with test roms (if it will possible) is LY update
-        //                  timings correct.
-        //                  Also need to check is it possible for developers handle LYC = 0.
+        //                  there are accurate timings with different behavior on CGB/DMG, now I don't implemented
+        //                  them fully completely.
         case State::EndLine:
             ++__current_line;
 
+            /// update line and state
             if (__current_line <= 143) {
                 __current_state = State::FirstOamSearch;
             }
             else {
                 __current_state = __current_line == 152 ? State::LastVblank : State::VBlank;
             }
+
+            // TODO(dolovnyak) on CGB_MODE it updates correct, but for DMG_MODE and CGB_DMG_MODE it updates
+            //                 during first four ticks on next line
+            //                 https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.9.1, 8.9.2)
+            ly_equal_lyc_interrupt_handle();
+
             __counter.step(ENDLINE_TIME);
             break;
 
 
         case State::LastEndLine:
             __current_state = State::FirstOamSearch;
+
             __counter.step(ENDLINE_TIME);
             break;
 
     }
     __counter.pay(1_CLKCycles);
+}
+
+void PPU::ly_equal_lyc_interrupt_handle() {
+    if (__current_line == __line_to_compare) {
+        if (__ly_equal_to_lyc_flag) {
+            __ly_equal_to_lyc_flag = false;
+        } else {
+            __stat_interrupt_requested = true;
+            __ly_equal_to_lyc_flag = true;
+            if (__ly_interrupt_enable)
+                ;  // TODO(dolovnyak, hgranule) request ly compare to lyc interrupt
+        }
+
+    }
 }
 
 }  // namespace GB::device

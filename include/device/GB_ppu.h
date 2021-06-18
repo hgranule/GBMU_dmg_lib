@@ -90,6 +90,8 @@ class PPU {
     std::vector<Object>     __intersected_objects;
     u8                      __next_object_index;
 
+    bool                    __stat_interrupt_requested;
+
     // LCDC
     bool                    __bg_window_enable;
     bool                    __obj_enable;
@@ -101,7 +103,7 @@ class PPU {
     bool                    __lcd_enable;
 
     // STAT
-    bool                    __ly_equal_to_lyc;
+    bool                    __ly_equal_to_lyc_flag;
     bool                    __hblank_interrupt_enable;
     bool                    __vblank_interrupt_enable;
     bool                    __oram_interrupt_enable;
@@ -113,6 +115,7 @@ class PPU {
     byte_t                  __line_to_compare;
 
     void add_oram_object(int current_object_index);
+    void ly_equal_lyc_interrupt_handle();
 };
 
 inline byte_t PPU::get_LCDC_reg() const {
@@ -143,7 +146,7 @@ inline void PPU::set_LCDC_reg(byte_t value) {
  */
 inline byte_t PPU::get_STAT_reg() const {
     return  __stat_mode
-            | __ly_equal_to_lyc << 2
+            | __ly_equal_to_lyc_flag << 2
             | __hblank_interrupt_enable << 3
             | __vblank_interrupt_enable << 4
             | __oram_interrupt_enable << 5
@@ -152,7 +155,7 @@ inline byte_t PPU::get_STAT_reg() const {
 }
 
 inline void PPU::set_STAT_reg(byte_t value) {
-    __ly_equal_to_lyc           = ::bit_n(2, value);
+    __ly_equal_to_lyc_flag      = ::bit_n(2, value);
     __hblank_interrupt_enable   = ::bit_n(3, value);
     __vblank_interrupt_enable   = ::bit_n(4, value);
     __oram_interrupt_enable     = ::bit_n(5, value);
