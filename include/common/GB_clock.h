@@ -14,7 +14,7 @@ using clk_cycle_t = int64_t;  ///< type for representing clock cycles
 constexpr static auto MCYCLE_TO_CLK_CYCLE = 0x4;
 
 constexpr inline uint64_t
-operator "" _CLKCycles(uint64_t cCycles) { return cCycles; }    // TODO(hgranule) code style
+operator "" _CLKCycles(uint64_t cCycles) { return cCycles; }    // TODO(hgranule) are cCycles correct by code style
 
 constexpr inline uint64_t
 operator "" _MCycles(uint64_t mCycles) { return mCycles * MCYCLE_TO_CLK_CYCLE; }
