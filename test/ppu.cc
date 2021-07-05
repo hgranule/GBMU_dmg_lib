@@ -12,7 +12,85 @@ using ORAM = GB::device::ORAM;
 using VRAM = GB::device::VRAM;
 
 TEST(PPU, Constructors) {
-    // TODO(dolovnyak)
+    ORAM oram;
+    VRAM vram;
+    PPU ppu(&oram, &vram);
+
+    /// dependent memory
+    EXPECT_EQ((size_t)ppu.__oram, (size_t)&oram);
+    EXPECT_EQ((size_t)ppu.__vram, (size_t)&vram);
+
+    /// inner logic variables
+    EXPECT_EQ(ppu.__current_state, PPU::State::FirstOamSearch);
+    EXPECT_EQ(ppu.__render_time, 0);
+    EXPECT_EQ(ppu.__counter.__counter, 0);
+    EXPECT_EQ(ppu.__next_object_index, 0);
+    EXPECT_EQ(ppu.__stat_interrupt_requested, false);
+    EXPECT_EQ(ppu.__intersected_objects.capacity(), 10);
+
+    /// LY LYC
+    EXPECT_EQ(ppu.__current_line, GB::LY_INIT_VALUE);
+    EXPECT_EQ(ppu.__line_to_compare, GB::LYC_INIT_VALUE);
+
+    /// LCDC
+    EXPECT_EQ(ppu.__bg_window_enable,               ::bit_n(0, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__obj_enable,                     ::bit_n(1, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__obj_high,                       ::bit_n(2, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__bg_tile_map_memory_shifted,     ::bit_n(3, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__bg_window_tiles_memory_shifted, ::bit_n(4, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__window_enable,                  ::bit_n(5, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__window_tile_map_memory_shifted, ::bit_n(6, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__lcd_enable,                     ::bit_n(7, GB::LCDC_INIT_VALUE));
+
+    /// STAT
+    EXPECT_EQ(ppu.__stat_mode, static_cast<PPU::STAT_Mode>(::bit_slice(1, 0, GB::STAT_INIT_VALUE)));
+    EXPECT_EQ(ppu.__ly_equal_to_lyc_flag,       ::bit_n(2, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__hblank_interrupt_enable,    ::bit_n(3, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__vblank_interrupt_enable,    ::bit_n(4, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__oram_interrupt_enable,      ::bit_n(5, GB::LCDC_INIT_VALUE));
+    EXPECT_EQ(ppu.__ly_interrupt_enable,        ::bit_n(6, GB::LCDC_INIT_VALUE));
+
+    // TODO(dolovnyak) need to supplement registers when pixelFIFO will be done
+
+
+    /// default move/copy/assignment
+
+    ppu.__current_line = 23;
+    ppu.__intersected_objects.push_back(PPU::Object{0, 2, 0, 0});
+    ppu.__intersected_objects.push_back(PPU::Object{0, 0, 4, 0});
+    EXPECT_EQ(ppu.__intersected_objects.size(), 2);
+
+    PPU ppu_test_move_constr(std::move(ppu));
+    EXPECT_EQ((size_t)ppu.__oram, (size_t)&oram);
+    EXPECT_EQ(ppu.__current_line, 23);
+    EXPECT_EQ(ppu.__intersected_objects.size(), 0);
+    EXPECT_EQ((size_t)ppu_test_move_constr.__oram, (size_t)&oram);
+    EXPECT_EQ(ppu_test_move_constr.__current_line, 23);
+    EXPECT_EQ(ppu_test_move_constr.__intersected_objects.size(), 2);
+    EXPECT_EQ(ppu_test_move_constr.__intersected_objects[0].pos_y, 2);
+    EXPECT_EQ(ppu_test_move_constr.__intersected_objects[1].sprite_index, 4);
+
+    PPU ppu_test_copy_constr(ppu_test_move_constr);
+    EXPECT_EQ(ppu_test_copy_constr.__current_line, 23);
+    EXPECT_EQ(ppu_test_copy_constr.__intersected_objects.size(), 2);
+    EXPECT_EQ(ppu_test_copy_constr.__intersected_objects[0].pos_y, 2);
+    EXPECT_EQ(ppu_test_copy_constr.__intersected_objects[1].sprite_index, 4);
+
+    PPU ppu_test_copy_assignment(&oram, &vram);
+    ppu_test_copy_assignment = ppu_test_copy_constr;
+    EXPECT_EQ(ppu_test_copy_assignment.__current_line, 23);
+    EXPECT_EQ(ppu_test_copy_assignment.__intersected_objects.size(), 2);
+    EXPECT_EQ(ppu_test_copy_assignment.__intersected_objects[0].pos_y, 2);
+    EXPECT_EQ(ppu_test_copy_assignment.__intersected_objects[1].sprite_index, 4);
+
+    PPU ppu_test_move_assignment(&oram, &vram);
+    ppu_test_move_assignment = std::move(ppu_test_copy_constr);
+    EXPECT_EQ(ppu_test_copy_constr.__current_line, 23);
+    EXPECT_EQ(ppu_test_copy_constr.__intersected_objects.size(), 0);
+    EXPECT_EQ(ppu_test_move_assignment.__current_line, 23);
+    EXPECT_EQ(ppu_test_move_assignment.__intersected_objects.size(), 2);
+    EXPECT_EQ(ppu_test_move_assignment.__intersected_objects[0].pos_y, 2);
+    EXPECT_EQ(ppu_test_move_assignment.__intersected_objects[1].sprite_index, 4);
 }
 
 TEST(PPU, LCDC_Register_get_set) {
@@ -30,6 +108,8 @@ TEST(PPU, LCDC_Register_get_set) {
 
     ppu.set_LCDC_reg(0b11010101);
     EXPECT_EQ(ppu.get_LCDC_reg(), 0b11010101);
+
+    // TODO (dolovnyak) or supplement this when screen on/off functionality will be done or create new test
 }
 
 TEST(PPU, STAT_Register_get_set) {
@@ -72,7 +152,7 @@ TEST(PPU, LY_Register_get) {
     VRAM vram;
     PPU ppu(&oram, &vram);
 
-    EXPECT_EQ(ppu.get_LY_reg(), 0x0);
+    EXPECT_EQ(ppu.get_LY_reg(), 0);
 
     /// first frame
     /// run 153 lines.

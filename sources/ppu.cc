@@ -31,14 +31,11 @@ __stat_interrupt_requested(false) {
     __oram_interrupt_enable     = ::bit_n(5, STAT_INIT_VALUE);
     __ly_interrupt_enable       = ::bit_n(6, STAT_INIT_VALUE);
 
-    // LY LYX
+    // LY LYC
     __current_line      = LY_INIT_VALUE;
     __line_to_compare   = LYC_INIT_VALUE;
 }
 
-// TODO(dolovnyak)  there is strange clock behavior depending on SCX register
-//                  https://gbdev.io/pandocs/STAT.html (In section properties STAT mode)
-//                  https://habr.com/ru/post/155323/ (In section LCDMODE_LYXX_OAM)
 /**
  * @brief:      Adds one object by the current index if it is crossed by a current line.
  *
@@ -55,8 +52,8 @@ __stat_interrupt_requested(false) {
  *
  *              https://gbdev.io/pandocs/OAM.html
  *
- *              When CGB mode intersected objects sorted only by oram index
- *              In CGB_DMG_MODE/DMG_MODE (need to check about DMG_MODE) it sorted by x coordinate, then by oram index.
+ *              When CGB mode - intersected objects sorted only by oram index
+ *              When CGB_DMG_MODE/DMG_MODE - intersected objects sorted by x coordinate, then by oram index.
  */
 void PPU::add_oram_object(int current_object_index) {
     // TODO(dolovnyak)  if (__dma.running)
@@ -75,7 +72,6 @@ void PPU::add_oram_object(int current_object_index) {
         if (TEMPORARY_GB_MODE_FLAG == CGB_MODE) {
             __intersected_objects.push_back(current_object);
         }
-        // TODO(dolovnyak) CGB_DMG_MODE - exactly correct (from PanDocs), but need to check about DMG_MODE.
         else if (TEMPORARY_GB_MODE_FLAG == DMG_MODE || TEMPORARY_GB_MODE_FLAG == CGB_DMG_MODE) {
             auto comparator = [](const Object& new_obj, const Object& cur_obj){ return new_obj.pos_x < cur_obj.pos_x; };
             insert_sorting(__intersected_objects, current_object, comparator);
@@ -88,10 +84,10 @@ void PPU::add_oram_object(int current_object_index) {
  *      OBJECT_SEARCH_TIME = ORAM_SEARCH_TIME / ORAM_OBJECTS_NUM = 2, SCANLINE_TIME = 456, ENDLINE_TIME = 4,
  *      __render_time = calculated depending on founded objects and SCX register
  *
- *      FirstOamSearch(CurObj = 0) -> SearchOam	{                                                        }
- *      SearchOam (cur obj <= 38) -> SearchOam	{ [Step = OBJECT_SEARCH_TIME] ++current_searching_object }
+ *      FirstOamSearch(CurObj = 0) -> SearchOam {                                                        }
+ *      SearchOam (cur obj <= 38) -> SearchOam  { [Step = OBJECT_SEARCH_TIME] ++current_searching_object }
  *      SearchOam (cur obj = 39) -> Render      {                                                        }
- *      Render -> Hblank                      	[Step = __render_time]
+ *      Render -> Hblank                        [A lot of steps with pixel fifos and pixel fetchers]
  *      Hblank -> EndLine                       [Step = SCANLINE_TIME - ORAM_SEARCH_TIME - __render_time - ENDLINE_TIME]
  *      EndLine (0 <= LY <= 143) -> SearchOam   {                              }
  *      EndLine (144 <= LY <= 152) -> Vblank    { [Step = ENDLINE_TIME] (++LY) }
@@ -103,7 +99,7 @@ void PPU::add_oram_object(int current_object_index) {
 void PPU::step() {
 
     if (!__counter.is_ready()) {
-        __counter.pay(1_CLKCycles);   //TODO(hgranule) what I need to pass in pay() parameter?
+        __counter.pay(1_CLKCycles);   // TODO(dolovnyak, hgranule) need to talk about counter and dots
         return;
     }
 
@@ -138,13 +134,12 @@ void PPU::step() {
 
 
         /* TODO
-         *          Implement FETCHING_STATE_MACHINE with pixelFIFO.
+         *          Implement FETCHING_STATE_MACHINE and pixelFIFO.
          *          Fetching sate machine states are something like:
-         *          FETCHER_GET_TILE, 2 clocks
-         *          FETCHER_GET_TILE_DATA_LOWER, 2 clocks
-         *          FETCHER_GET_TILE_DATA_HIGH, 2 clocks
-         *          FETCHER_PUSH, 2 clocks
-         *          ................
+         *          FETCHER_GET_TILE, 2 dots
+         *          FETCHER_GET_TILE_DATA_LOWER, 2 dots
+         *          FETCHER_GET_TILE_DATA_HIGH, 2 dots
+         *          FETCHER_PUSH, 2 dots
          */
         case State::Render:
             __stat_mode = STAT_Mode::STAT_Render;
@@ -199,24 +194,23 @@ void PPU::step() {
             break;
 
 
-        // TODO(dolovnyak)  In this source:
-        //                  https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.8)
-        //                  there are accurate timings with different behavior on CGB/DMG, now I don't implemented
-        //                  them fully completely.
+        /**
+         * NOTE:    In this source:
+         *          https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (part 8)
+         *          there are accurate timings with different behavior on CGB/DMG, now it's not fully implemented.
+         */
         case State::EndLine:
             ++__current_line;
 
             /// update line and state
-            if (__current_line <= 143) {
-                __current_state = State::FirstOamSearch;
-            }
-            else {
+            if (__current_line >= 144) {
                 __current_state = __current_line == 152 ? State::LastVblank : State::VBlank;
             }
+            else
+            {
+                __current_state = State::FirstOamSearch;
+            }
 
-            // TODO(dolovnyak) on CGB_MODE it updates correct, but for DMG_MODE and CGB_DMG_MODE it updates
-            //                 during first four ticks on next line
-            //                 https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.9.1, 8.9.2)
             ly_equal_lyc_interrupt_handle();
 
             __counter.step(ENDLINE_TIME);

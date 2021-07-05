@@ -41,10 +41,11 @@ class PPU {
         byte_t attributes;
     };
 
+    // TODO (dolobnyak, hgranule) need to remake on dots
     constexpr static clk_cycle_t ORAM_SEARCH_TIME = 80_CLKCycles;
     constexpr static clk_cycle_t OBJECT_SEARCH_TIME = 2_CLKCycles;
     constexpr static clk_cycle_t SCANLINE_TIME = 456_CLKCycles;
-    constexpr static clk_cycle_t ENDLINE_TIME = 4_CLKCycles;  // TODO(dolovnyak) need to check timings on test roms
+    constexpr static clk_cycle_t ENDLINE_TIME = 4_CLKCycles;
 
     // TODO(dolovnyak, hgranule) maybe rename prettier
     constexpr static unsigned MAX_INTERSECTED_OBJECTS = 10;
@@ -141,7 +142,7 @@ inline void PPU::set_LCDC_reg(byte_t value) {
 }
 
 /**
- * @details:    Bit 7 unused and always set in 1 by source
+ * @details:    Bit 7 unused and always set in 1
  *              https://github.com/AntonioND/giibiiadvance/blob/master/docs/TCAGBD.pdf (8.5)
  */
 inline byte_t PPU::get_STAT_reg() const {
