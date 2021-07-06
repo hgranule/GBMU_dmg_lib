@@ -55,6 +55,11 @@ TEST(Work_RAM, Copy_Move_Constructor) {
 TEST(Work_RAM, Phys_Addr_Read_Write) {
     WRAM ram;
 
+    /// All clean by default
+    for (int i = 0; i < 0x4000; ++i) {
+        EXPECT_EQ(ram.read_phys_addr(i), 0);
+    }
+
     /// Bank 0
     ram.write_phys_addr(0x10, 0x42);
     ram.write_phys_addr(0x11, 0x21);

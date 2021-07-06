@@ -19,7 +19,7 @@ constexpr unsigned VBK_INIT_VALUE = 0x0;
 
 constexpr unsigned INTC_IF_INIT_VALUE = 0x0;
 constexpr unsigned INTC_IE_INIT_VALUE = 0x0;
-constexpr bool INTC_IME_INIT_VALUE = true;
+constexpr bool     INTC_IME_INIT_VALUE = true;
 
 constexpr unsigned ORAM_OBJECTS_NUM = 40;
 constexpr unsigned ORAM_SIZE = ORAM_OBJECTS_NUM * 4_Bytes;
@@ -29,10 +29,14 @@ constexpr unsigned VRAM_NON_CGB_SIZE = VRAM_BANK_SIZE;
 constexpr unsigned VRAM_CGB_SIZE = VRAM_BANK_SIZE * 2;
 constexpr unsigned VRAM_MAX_SIZE = VRAM_CGB_SIZE;
 
+constexpr unsigned LCDC_INIT_VALUE = 0x0;
+constexpr unsigned STAT_INIT_VALUE = 0x0;
+constexpr unsigned LY_INIT_VALUE = 0x0;
+constexpr unsigned LYC_INIT_VALUE = 0x0;
 
 enum GBModeFlag : u16 {
     DMG_MODE = 0b000001,
-    MGB_MODE = 0b000010,
+    MGB_MODE = 0b000010,  // TODO(hgranule) I really want to delete it
     CGB_DMG_MODE = 0b000100,
     CGB_MODE = 0b001000
 };

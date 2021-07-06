@@ -1,6 +1,6 @@
 /**
  * @file GB_clock.h
- * @brief File describes some functionallity to deal with clock cycles
+ * @brief File describes some functionality to deal with clock cycles
  */
 
 #ifndef COMMON_GB_CLOCK_H_
@@ -14,7 +14,7 @@ using clk_cycle_t = int64_t;  ///< type for representing clock cycles
 constexpr static auto MCYCLE_TO_CLK_CYCLE = 0x4;
 
 constexpr inline uint64_t
-operator "" _CLKCycles(uint64_t cCycles) { return cCycles; }
+operator "" _CLKCycles(uint64_t cCycles) { return cCycles; }    // TODO(hgranule) are cCycles correct by code style
 
 constexpr inline uint64_t
 operator "" _MCycles(uint64_t mCycles) { return mCycles * MCYCLE_TO_CLK_CYCLE; }
@@ -26,7 +26,7 @@ namespace devsync {
  */
 inline bool
 is_ready(const clk_cycle_t clock) {
-    return clock >= 0;
+    return clock <= 0;  // TODO(dolovnyak, hgranule) I changed it for the counter starts working
 }
 
 /**
@@ -42,11 +42,13 @@ pay(clk_cycle_t& clock, clk_cycle_t ccls) {
  */
 inline void
 step(clk_cycle_t& clock, clk_cycle_t ccls) {
-    clock = std::min(clock + ccls, clk_cycle_t(0));
+    clock = std::max(clock + ccls, clk_cycle_t(0));  // TODO(hgranule) you told we use positive cycles when call step,
+                                                     //                but in this case clock will always 0
+                                                     //                also pay function takes away clocks so it's error
 }
 
 /**
- * @brief counter class whihc counts passed cycles and could be used for action sycnronization
+ * @brief counter class which counts passed cycles and could be used for action synchronization
  */
 class counter_t {
  protected:

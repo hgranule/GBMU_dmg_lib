@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#define protected public    // TODO(dolovnyak): Use #include "GB_test.h" now
+#include "GB_test.h"
 
 #include "device/GB_oram.h"
 
@@ -10,7 +10,13 @@ using ORAM = GB::device::ORAM;
 
 TEST(ObjectsRAM, Constructors) {
     ORAM oram;
+
     EXPECT_EQ(oram.get_memory_buffer_ref().size(), 160);
+
+    /// All clean by default
+    for (int i = 0; i < 160; ++i) {
+        EXPECT_EQ(oram.get_memory_buffer_ref()[i], 0);
+    }
 
     oram.write_phys_addr(0, 100);
     oram.write_phys_addr(10, 101);
@@ -65,4 +71,4 @@ TEST(ObjectsRAM, Phys_Read_Write_And_Correct_Raw_Memory) {
 
 // TODO(dolovnyak) make unit-tests for read/write with memory_bus when it will be done
 
-}   // namespace
+}  // namespace
