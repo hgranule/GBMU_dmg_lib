@@ -2,6 +2,7 @@
 #define COMMON_GB_UTILITIES_H_
 
 #include <vector>
+#include <algorithm>
 
 template<typename T, typename Comp>
 inline typename std::vector<T>::iterator insert_sorting(std::vector<T>& vector, const T& new_elem, Comp comparator) {
