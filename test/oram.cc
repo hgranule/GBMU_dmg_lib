@@ -71,4 +71,4 @@ TEST(ObjectsRAM, Phys_Read_Write_And_Correct_Raw_Memory) {
 
 // TODO(dolovnyak) make unit-tests for read/write with memory_bus when it will be done
 
-}   // namespace
+}  // namespace

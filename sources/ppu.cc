@@ -69,13 +69,15 @@ void PPU::add_oram_object(int current_object_index) {
 
     if (current_object.pos_y <= __current_line + OBJ_Y_INDENT
         && current_object.pos_y + object_height > __current_line + OBJ_Y_INDENT) {
+
         if (TEMPORARY_GB_MODE_FLAG == CGB_MODE) {
             __intersected_objects.push_back(current_object);
-        }
+        }  // TODO(hgranule) linter has error here, but we discussed what "else if" should be on the different lines
         else if (TEMPORARY_GB_MODE_FLAG == DMG_MODE || TEMPORARY_GB_MODE_FLAG == CGB_DMG_MODE) {
             auto comparator = [](const Object& new_obj, const Object& cur_obj){ return new_obj.pos_x < cur_obj.pos_x; };
             insert_sorting(__intersected_objects, current_object, comparator);
         }
+
     }
 }
 
@@ -168,8 +170,9 @@ void PPU::step() {
         case State::VBlank:
             __stat_mode = STAT_Mode::STAT_Vblank;
 
-            if (__current_line == 143)
-                ; // TODO(dolovnyak, hgranule) request VBL interrupt
+            if (__current_line == 143) {
+                // TODO(dolovnyak, hgranule) request VBL interrupt
+            }
 
             if (!__stat_interrupt_requested && __vblank_interrupt_enable) {
                 // TODO(dolovnyak, hgranule) request stat vblank interrupt
@@ -205,9 +208,8 @@ void PPU::step() {
             /// update line and state
             if (__current_line >= 144) {
                 __current_state = __current_line == 152 ? State::LastVblank : State::VBlank;
-            }
-            else
-            {
+            }  // TODO(hgranule) linter has error here, but we discussed what "else if" should be on the different lines
+            else {
                 __current_state = State::FirstOamSearch;
             }
 
@@ -234,8 +236,9 @@ void PPU::ly_equal_lyc_interrupt_handle() {
         } else {
             __stat_interrupt_requested = true;
             __ly_equal_to_lyc_flag = true;
-            if (__ly_interrupt_enable)
-                ;  // TODO(dolovnyak, hgranule) request ly compare to lyc interrupt
+            if (__ly_interrupt_enable) {
+                // TODO(dolovnyak, hgranule) request ly compare to lyc interrupt
+            }
         }
 
     }

@@ -1,5 +1,5 @@
-#ifndef GB_PPU_H_
-# define GB_PPU_H_
+#ifndef DEVICE_GB_PPU_H_
+# define DEVICE_GB_PPU_H_
 
 #include <vector>
 #include "common/GB_types.h"
@@ -14,7 +14,7 @@ namespace GB::device {
 
 class PPU {
  public:
-    GBModeFlag  TEMPORARY_GB_MODE_FLAG; // TODO(dolovnyak, hgranule) I created it to be able to test.
+    GBModeFlag  TEMPORARY_GB_MODE_FLAG;  // TODO(dolovnyak, hgranule) I created it to be able to test.
 
     enum STAT_Mode {
         STAT_Hblank = 0,
@@ -41,7 +41,7 @@ class PPU {
         byte_t attributes;
     };
 
-    // TODO (dolobnyak, hgranule) need to remake on dots
+    // TODO(dolobnyak, hgranule) need to remake on dots
     constexpr static clk_cycle_t ORAM_SEARCH_TIME = 80_CLKCycles;
     constexpr static clk_cycle_t OBJECT_SEARCH_TIME = 2_CLKCycles;
     constexpr static clk_cycle_t SCANLINE_TIME = 456_CLKCycles;
@@ -175,6 +175,6 @@ inline void PPU::set_LYC_reg(byte_t value) {
     __line_to_compare = value;
 }
 
-}
+}  // namespace GB::device
 
-#endif
+#endif  // DEVICE_GB_PPU_H_

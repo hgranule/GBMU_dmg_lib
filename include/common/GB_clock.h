@@ -26,7 +26,7 @@ namespace devsync {
  */
 inline bool
 is_ready(const clk_cycle_t clock) {
-    return clock <= 0;   // TODO i changed it so the counter starts working
+    return clock <= 0;  // TODO(dolovnyak, hgranule) I changed it for the counter starts working
 }
 
 /**

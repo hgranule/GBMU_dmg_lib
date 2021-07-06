@@ -36,7 +36,7 @@ constexpr unsigned LYC_INIT_VALUE = 0x0;
 
 enum GBModeFlag : u16 {
     DMG_MODE = 0b000001,
-    MGB_MODE = 0b000010, // TODO(hgranule) I really want to delete it
+    MGB_MODE = 0b000010,  // TODO(hgranule) I really want to delete it
     CGB_DMG_MODE = 0b000100,
     CGB_MODE = 0b001000
 };

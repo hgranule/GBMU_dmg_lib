@@ -109,7 +109,7 @@ TEST(PPU, LCDC_Register_get_set) {
     ppu.set_LCDC_reg(0b11010101);
     EXPECT_EQ(ppu.get_LCDC_reg(), 0b11010101);
 
-    // TODO (dolovnyak) or supplement this when screen on/off functionality will be done or create new test
+    // TODO(dolovnyak) or supplement this when screen on/off functionality will be done or create new test
 }
 
 TEST(PPU, STAT_Register_get_set) {
@@ -278,7 +278,7 @@ TEST(PPU, add_oram_object) {
 
     /// bottom border with 8x16
     ppu.__intersected_objects.clear();
-    ppu.__current_line = 143; // last visible line
+    ppu.__current_line = 143;  // last visible line
     ppu.__obj_high = true;
     bzero(objects, GB::ORAM_SIZE);
     objects[13].pos_y = 143;
@@ -296,7 +296,7 @@ TEST(PPU, add_oram_object) {
 
     /// priority in CGB_MODE
     ppu.__intersected_objects.clear();
-    ppu.__current_line = 143; // last visible line
+    ppu.__current_line = 143;  // last visible line
     ppu.__obj_high = true;
     bzero(objects, GB::ORAM_SIZE);
 
@@ -330,7 +330,7 @@ TEST(PPU, add_oram_object) {
     /// priority in DMG_MODE/CGB_DMG_MODE
     ppu.TEMPORARY_GB_MODE_FLAG = GB::GBModeFlag::CGB_DMG_MODE;
     ppu.__intersected_objects.clear();
-    ppu.__current_line = 143; // last visible line
+    ppu.__current_line = 143;  // last visible line
     ppu.__obj_high = true;
     bzero(objects, GB::ORAM_SIZE);
 
@@ -411,4 +411,4 @@ TEST(PPU, oram_search_pipeline) {
     EXPECT_EQ(ppu.get_STAT_reg(), 0b10000000 | PPU::STAT_SearchingOAM);
 }
 
-}
+}  // namespace
